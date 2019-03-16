@@ -10,23 +10,27 @@ $login_error=[];
 if(isset($_POST['submit'])){
     $username=$_POST['username'];
     $password=$_POST['password'];
-    $v=1;
+    $v=-1;
     if(preg_match("/^([a-z0-9\+_\-]+)(\.[a-z0-9\+_\-]+)*@([a-z0-9\-]+\.)+[a-z]{2,6}$/ix", $username))
     {
-        if(mysqli_num_rows(email_check($username))!=1){
+        if((email_check($username))!=1){
             $login_error[]="Your Email Id is not registered";
+        }
+        else{
             $v=1;
         }
     }
     else{
-        if(mysqli_num_rows(dname_check($username))!=1){
+        if((dname_check($username))!=1){
             $login_error[]="Invalid username";
+        }
+        else{
             $v=2;
         }
     }
     if($v>0){
-        $tmp=mysqli_fetch_row(password_check($username,$v));
-        if(password_verify($password,$tmp[0])){
+        $tmp=(password_check($username,$v));
+        if(password_verify($password,$tmp)){
             echo "<script>alert('Login Successfull');</script>";
         }
         else{
