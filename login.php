@@ -26,8 +26,7 @@ if(isset($_POST['submit'])){
     }
     if($v>0){
         $tmp=mysqli_fetch_row(password_check($username,$v));
-        echo password_hash($password,PASSWORD_BCRYPT);
-        if(password_hash($password,PASSWORD_BCRYPT)==$tmp[0]){
+        if(password_verify($password,$tmp[0])){
             echo "<script>alert('Login Successfull');</script>";
         }
         else{
