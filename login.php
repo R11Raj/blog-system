@@ -1,51 +1,48 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <title>Blog Sytem Sign-up</title>
+    <title>Blog Sytem Log In</title>
     <meta charset="utf-8">
 </head>
 <?php
 require('queries.php');
-$login_error=[];
+require_once __DIR__ . '/utils/output-utils.php';
+require_once 'utils/user-utils.php';
+$user_info = SessionUtils::check_user_login_status();
+if ($user_info){
+    header('Location: timeline.php');
+}
 if(isset($_POST['submit'])){
     $username=$_POST['username'];
     $password=$_POST['password'];
-    $v=1;
-    if(preg_match("/^([a-z0-9\+_\-]+)(\.[a-z0-9\+_\-]+)*@([a-z0-9\-]+\.)+[a-z]{2,6}$/ix", $username))
+    $v=-1;
+    $failed = 'Login failed.Username or Password is incorrect';
+    $loggedUser=SessionUtils::username_password_check($username,$password);
+    if(!$loggedUser)
     {
-        if(mysqli_num_rows(email_check($username))!=1){
-            $login_error[]="Your Email Id is not registered";
-            $v=1;
-        }
+        OutputUtils::note_display_error($failed);
+        exit();
     }
-    else{
-        if(mysqli_num_rows(dname_check($username))!=1){
-            $login_error[]="Invalid username";
-            $v=2;
-        }
-    }
-    if($v>0){
-        $tmp=mysqli_fetch_row(password_check($username,$v));
-        if(password_verify($password,$tmp[0])){
-            echo "<script>alert('Login Successfull');</script>";
-        }
-        else{
-            $login_error[]="Password is incorrect";
-        }
-    }
+    echo "<script>alert('Login Successfull, Welcome ');</script>";
+    SessionUtils::create_session($loggedUser['user_id']);
+    header('Location: '.'timeline.php');
 }
 ?>
 <body>
     <h1>Login</h1>
-    <p><?php global $login_error;
-        if(isset($_POST['submit']) && count($login_error)>0){
-            echo "<ul>";
-            foreach($login_error as $error)
+    <p><?php 
+        if (OutputUtils::errors_exist()) {
+            $errors = OutputUtils::get_display_errors();
+            echo '<ul>';
+            foreach($errors as $error)
             {
-                echo "<li>".$error."</li>";
+                echo '<li>'.$error.'</li>';
             }
+            echo '</ul>';
         } ?>
     </p>
+    <div>
+
     <form action="#" method="post">
         <table>
             <tr>
@@ -59,4 +56,5 @@ if(isset($_POST['submit'])){
             </tr>
         </table>
     </form>
+    </div>
 </body>
