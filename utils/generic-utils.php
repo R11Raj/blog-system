@@ -21,4 +21,4 @@ class GenericUtils {
         }
         return $str;
     }
-}
+}?>

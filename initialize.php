@@ -19,3 +19,4 @@ function session_info($username,$password)
     $_SESSION['last_login']=time();
     $_SESSION['session_expires']=time()+3600;
 }
+?>
