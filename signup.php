@@ -3,10 +3,12 @@
   <head>
     <title>Blog Sytem Sign-up</title>
     <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   </head>
 <?php
-
 require('queries.php');
+require('utils/user-utils.php');
 if(isset($_POST['submit'])) {
     $name = $_POST['name'];
     $display_name = $_POST['display_name'];
@@ -28,11 +30,11 @@ if(isset($_POST['submit'])) {
             $errors[]="Display Name should be atleast 4 characters long";
             $v=0;
         }
-        if(mysqli_num_rows(dname_check($display_name))==1){
+        if(!UserUtils::check_display_name_availibility($display_name)){
             $errors[]="Display name already Taken";
             $v=0;
         }
-        if(mysqli_num_rows(email_check($email))==1){
+        if(!UserUtils::check_email_availibility($email)){
             $errors[]="Email Id already Taken";
             $v=0;
         }
@@ -45,7 +47,7 @@ if(isset($_POST['submit'])) {
     $v=validate($name, $display_name,$email, $password, $cpassword);
     if ($v==1){
         $password=password_hash($password,PASSWORD_BCRYPT);
-        $result=adduser($name,$display_name,$email,$password);
+        $result=UserUtils::add_user($name,$display_name,$email,$password);
         if($result){
             echo "<script>alert('User added Successfully');</script>";
         }
@@ -53,7 +55,7 @@ if(isset($_POST['submit'])) {
     }
 }?>
   <body>
-        <h1>Sign Up</h1>
+        <h1 class="center">Sign Up</h1>
         <p><?php global $errors;
             if(isset($_POST['submit']) && count($errors)>0){
                 echo "Following errors are there:";
