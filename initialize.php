@@ -10,6 +10,7 @@ include('database.php');
 define("SIGN_UP", dirname(__FILE__));
 $db = db_connect();
 $errors=[];
+
 function session_info($username,$password)
 {
     session_regenerate_id();
