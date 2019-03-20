@@ -16,7 +16,6 @@ require('queries.php');
     }
     .title{
         text-align: center;
-
     }
     .post-col{
         display: flex;
@@ -25,7 +24,6 @@ require('queries.php');
         align-items: center;
         background: brown;
         overflow: hidden;
-
     }
     .blog{
         border: 2px solid red;
@@ -42,11 +40,18 @@ require('queries.php');
 
     }
     #logout{
-        width: 60px;
-        height: 30px;
         align-self: center;
         margin-right: 5%;
-        border-radius: 3px;
+        display: block;
+        text-decoration: none;
+        width: 70px;
+        height: 25px;
+        background: white;
+        padding: 10px;
+        text-align: center;
+        border-radius: 5px;
+        color: black;
+        font-weight: bold;
     }
 </style>
 <body>
@@ -54,7 +59,7 @@ require('queries.php');
         <h1 class="title">Timeline</h1>
         <div class="user-function">
         <h3 style="text-align: center;">Welcome <?php echo $_COOKIE['user_id'];?></h3>&nbsp&nbsp
-        <button id="logout" type="button">Logout</button>
+        <a id="logout" href="logout.php">Logout</a>
         </div>
     </nav>
     <div class="post-col">

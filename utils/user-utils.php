@@ -129,7 +129,8 @@ class SessionUtils {
         ));
         // Create session cookie
         setcookie('app_session_code', $session_code, $expire_time, '/');
-        setcookie('user_id',$display_name,$expire_time,'/');
+        setcookie('user_id',$user_id,$expire_time,'/');
+        setcookie('display_name',$display_name,$expire_time,'/');
     }
 
     static function check_user_login_status() {
