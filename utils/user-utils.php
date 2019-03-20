@@ -34,7 +34,7 @@ class UserUtils {
         try{
             $stmt = $db->prepare( 'SELECT * FROM users WHERE display_name=:display_name;');
             $stmt->execute(array(':display_name'=>$display_name));
-            if($stmt->rowCount()==1)
+            if($stmt->rowCount()>0)
                 return false;
 
             return true;
@@ -49,7 +49,7 @@ class UserUtils {
         try{
             $stmt = $db->prepare( 'SELECT * FROM users WHERE email=:email;');
             $stmt->execute(array(':email'=>$email));
-            if($stmt->rowCount()==1)
+            if($stmt->rowCount()>0)
                 return false;
 
             return true;
@@ -70,20 +70,23 @@ class SessionUtils {
      */
     static function username_password_check($username, $password) {
         $db = DatabaseUtils::get_connection();
-        
-        // Check username/email
-        $stmt = $db->prepare('SELECT * FROM users WHERE email=:username OR display_name=:username');
-        $stmt->execute(array(':username'=>$username));
-        if ($stmt->rowCount()==0) {
-            return false;
+        try{
+            // Check username/email
+            $stmt = $db->prepare('SELECT * FROM users WHERE email=:username OR display_name=:username');
+            $stmt->execute(array(':username'=>$username));
+            if ($stmt->rowCount()==0) {
+                return false;
+            }
+        }catch(PDOException $e)
+        {
+            echo $stmt . "<br>" . $e->getMessage();
         }
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        
+
         // Check password validity
         $hash = $row['password'];
         if (!password_verify($password, $hash))
             return false;
-        
         // All is well; return user info
         return $row;
     }
@@ -129,8 +132,6 @@ class SessionUtils {
         ));
         // Create session cookie
         setcookie('app_session_code', $session_code, $expire_time, '/');
-        setcookie('user_id',$user_id,$expire_time,'/');
-        setcookie('display_name',$display_name,$expire_time,'/');
     }
 
     static function check_user_login_status() {
@@ -171,10 +172,10 @@ class SessionUtils {
         $stmt = $db->prepare('SELECT permission FROM permissions WHERE user_id=:user_id');
         $stmt->execute(array(':user_id'=>$user_id));
         $permissions=$stmt->fetchAll(PDO::FETCH_ASSOC);
-        if(!array_search($permission,$permissions))
-            return false;
+        if(array_search($permission,$permissions))
+            return true;
         //User has permissions
-        return true;
+        return false;
     }
     /*
      * example: dashboard.php

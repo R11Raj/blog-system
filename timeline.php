@@ -5,8 +5,8 @@
     <meta charset="utf-8">
 </head>
 <?php
-require('queries.php');
-
+require('utils/post-utils.php');
+require('utils/user-utils.php');
 ?>
 <style>
     .navbar{
@@ -58,19 +58,25 @@ require('queries.php');
     <nav class="navbar">
         <h1 class="title">Timeline</h1>
         <div class="user-function">
-        <h3 style="text-align: center;">Welcome <?php echo $_COOKIE['display_name'];?></h3>&nbsp&nbsp
+        <?php
+        $user_info=SessionUtils::check_user_login_status();
+        if($user_info){
+            echo '<h3 style="text-align: center;">Welcome '.$user_info['display_name'].'</h3>';
+        }else{
+            echo '<h3 style="text-align: center;">Welcome</h3>';
+        }?>
         <a id="logout" href="logout.php">Logout</a>
         </div>
     </nav>
     <div class="post-col">
         <?php
-        $posts=posts();
+        $posts=PostUtils::posts();
         foreach ($posts as $post) {
             echo "<div class='blog'>";
             echo "<h3>".$post['post_header']."</h3>" ;
             echo "<p>".$post['content']."</p>";
             echo "<button>Like it</button>";
-            echo " <span>".$post['likes']." Likes</span></div>";
+            echo "<span>".$post['likes']." Likes</span></div>";
         }
         ?>
     </div>

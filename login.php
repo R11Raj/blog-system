@@ -1,33 +1,35 @@
+<?php
+
+require_once __DIR__ . '/utils/output-utils.php';
+require_once 'utils/user-utils.php';
+$user_info = SessionUtils::check_user_login_status();
+if ($user_info){
+    header('Location: timeline.php');
+    exit();
+}
+if(isset($_POST['submit'])){
+    $username=@$_POST['username'];
+    $password=@$_POST['password'];
+    $failed = 'Login failed...Username or Password is incorrect';
+    $loggedUser=SessionUtils::username_password_check($username,$password);
+    if(!$loggedUser)
+    {
+        OutputUtils::note_display_error($failed);
+    }
+    else{
+        SessionUtils::create_session($loggedUser['user_id'],$loggedUser['display_name']);
+        header('Location: '.'timeline.php');
+        exit();
+    }
+
+}
+?>
 <!doctype html>
 <html lang="en">
 <head>
     <title>Blog Sytem Log In</title>
     <meta charset="utf-8">
 </head>
-<?php
-require('queries.php');
-require_once __DIR__ . '/utils/output-utils.php';
-require_once 'utils/user-utils.php';
-$user_info = SessionUtils::check_user_login_status();
-if ($user_info){
-    header('Location: timeline.php');
-}
-if(isset($_POST['submit'])){
-    $username=$_POST['username'];
-    $password=$_POST['password'];
-    $v=-1;
-    $failed = 'Login failed.Username or Password is incorrect';
-    $loggedUser=SessionUtils::username_password_check($username,$password);
-    if(!$loggedUser)
-    {
-        OutputUtils::note_display_error($failed);
-        exit();
-    }
-    echo "<script>alert('Login Successfull, Welcome ');</script>";
-    SessionUtils::create_session($loggedUser['user_id'],$loggedUser['display_name']);
-    header('Location: '.'timeline.php');
-}
-?>
 <style>
     .nav-bar{
         width: 100%;
@@ -51,6 +53,10 @@ if(isset($_POST['submit'])){
         align-self: center;
 
     }
+    ul{
+        list-style-type: none;
+        color: red;
+    }
 </style>
 <body>
     <nav class="nav-bar">
@@ -63,7 +69,7 @@ if(isset($_POST['submit'])){
             echo '<ul>';
             foreach($errors as $error)
             {
-                echo '<li>'.$error.'</li>';
+                echo '<li>'.$error['message'].'</li>';
             }
             echo '</ul>';
         } ?>

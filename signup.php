@@ -7,51 +7,48 @@
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   </head>
 <?php
-require('queries.php');
+require('utils/post-utils.php');
 require('utils/user-utils.php');
+require ('utils/output-utils.php');
 if(isset($_POST['submit'])) {
-    $name = $_POST['name'];
-    $display_name = $_POST['display_name'];
-    $email = $_POST['email'];
-    $password = $_POST['password'];
-    $cpassword = $_POST['confirm_password'];
+    $name = @$_POST['name'];
+    $display_name = @$_POST['display_name'];
+    $email = @$_POST['email'];
+    $password = @$_POST['password'];
+    $cpassword = @$_POST['confirm_password'];
     function validate($name, $display_name,$email, $password, $cpassword)
-    {     global $errors;
-        $v=1;
+    {
         if (!preg_match("/^[a-zA-Z ]*$/", $name)) {
-            $errors[]="invalid first name";
-            $v=0;
+            OutputUtils::note_display_error("invalid first name");
         }
         if(strlen($password)<8){
-            $errors[]="Password should be atleast 8 characters long";
-            $v=0;
+            OutputUtils::note_display_error("Password should be atleast 8 characters long");
         }
         if(strlen($display_name)<4){
-            $errors[]="Display Name should be atleast 4 characters long";
-            $v=0;
+            OutputUtils::note_display_error("Display Name should be atleast 4 characters long");
         }
         if(!UserUtils::check_display_name_availibility($display_name)){
-            $errors[]="Display name already Taken";
-            $v=0;
+            OutputUtils::note_display_error("Display name already Taken");
         }
         if(!UserUtils::check_email_availibility($email)){
-            $errors[]="Email Id already Taken";
-            $v=0;
+            OutputUtils::note_display_error("Email Id already Taken");
         }
         if ($password != $cpassword) {
-            $errors[]="Passwords don't match";
-            $v=0;
+            OutputUtils::note_display_error("Passwords don't match");
         }
-        return $v;
     }
-    $v=validate($name, $display_name,$email, $password, $cpassword);
-    if ($v==1){
+    validate($name, $display_name,$email, $password, $cpassword);
+    if (count(OutputUtils::get_display_errors())==0){
         $password=password_hash($password,PASSWORD_BCRYPT);
         $result=UserUtils::add_user($name,$display_name,$email,$password);
         if($result){
-            echo "<script>alert('User added Successfully');</script>";
+            OutputUtils::$page_mode='user added';
+        }else{
+            OutputUtils::$page_mode='error';
         }
-
+    }
+    else{
+        OutputUtils::$page_mode='error';
     }
 }?>
   <style>
@@ -72,21 +69,31 @@ if(isset($_POST['submit'])) {
           display: block;
           margin-bottom: 20px;
       }
+      li{
+          color:red;
+      }
   </style>
   <body>
         <nav class="nav-bar">
             <h1 class="center">Sign Up</h1>
         </nav>
         <div class="main">
-        <p><?php global $errors;
-            if(isset($_POST['submit']) && count($errors)>0){
-                echo "Following errors are there:";
-                echo "<ul>";
-                foreach($errors as $error)
-                {
-                    echo "<li>".$error."</li>";
+        <p><?php
+            $page_mode=OutputUtils::$page_mode;
+            if($page_mode=='error' || $page_mode=='form'){
+                if(isset($_POST['submit']) && count(OutputUtils::get_display_errors())>0){
+                    echo "Following errors are there:";
+                    echo "<ul>";
+                    $errors=OutputUtils::get_display_errors();
+                    foreach($errors as $error)
+                    {
+                        echo "<li>".$error['message']."</li>";
+                    }
                 }
-            } ?>
+            }elseif ($page_mode='user added'){
+                echo '<h4 style="color:green;text-align: center;">User added Successfully please log in to the system  <a href="login.php"> click here to open log in page</a> </h4>';
+            }
+            ?>
         </p>
         <form action="#" method="post">
             <table>

@@ -14,11 +14,9 @@
 require_once (__DIR__.'/utils/database.php');
 $db = DatabaseUtils::get_connection();
 try{
-    $user_id=$_COOKIE['user_id'];
-    $stmt = $db->prepare('UPDATE user_sessions SET is_valid=0 WHERE user_id=:user_id;');
-    $stmt->execute(array(':user_id'=>$user_id));
-    setcookie('user_id',false,time()-3600, '/');
-    setcookie('display_name',false ,time()-3600, '/');
+    $session_code=@$_COOKIE['app_session_code'];
+    $stmt = $db->prepare('UPDATE user_sessions SET is_valid=0 WHERE session_code=:session_code;');
+    $stmt->execute(array(':session_code'=>$session_code));
     setcookie('app_session_code',false ,time()-3600, '/' );
 }
 catch(PDOException $e)

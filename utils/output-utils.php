@@ -8,7 +8,7 @@
 class OutputUtils {
     
     static $display_errors = array();
-    
+    static $page_mode='form';
     static function note_display_error($message, $priority=0) {
         self::$display_errors[] = array('message'=>$message, 'priority'=>$priority);
     }
@@ -20,6 +20,9 @@ class OutputUtils {
     static function get_display_errors() {
         return self::$display_errors;
     }
-    
+
+    static function get_page_mode(){
+        return self::$page_mode;
+    }
 }
 ?>
