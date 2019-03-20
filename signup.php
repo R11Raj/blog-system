@@ -54,8 +54,30 @@ if(isset($_POST['submit'])) {
 
     }
 }?>
+  <style>
+      .nav-bar{
+          width: 100%;
+          height: 20%;
+          text-align: center;
+          background: blue;
+          color: white;
+      }
+      .main{
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+      }
+      label,input{
+          display: block;
+          margin-bottom: 20px;
+      }
+  </style>
   <body>
-        <h1 class="center">Sign Up</h1>
+        <nav class="nav-bar">
+            <h1 class="center">Sign Up</h1>
+        </nav>
+        <div class="main">
         <p><?php global $errors;
             if(isset($_POST['submit']) && count($errors)>0){
                 echo "Following errors are there:";
@@ -78,7 +100,7 @@ if(isset($_POST['submit'])) {
                 <td><label>Email address</label></td><td><input type="email" name="email" required value="<?php echo isset($_POST['email']) ? $_POST['email'] : '';?>"></td>
             </tr>
             <tr>
-                <td><span><br>password should be atleast 8 characters long</span></td>
+                <td><span><br>**password should be atleast 8 characters long</span></td>
             </tr>
             <tr>
                 <td><label>Password</label></td><td><input type="password" name="password" required></td>
@@ -91,6 +113,7 @@ if(isset($_POST['submit'])) {
             </tr>
             </table>
         </form>
+        </div>
   </body>
 </html>
 

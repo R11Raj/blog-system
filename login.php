@@ -24,12 +24,39 @@ if(isset($_POST['submit'])){
         exit();
     }
     echo "<script>alert('Login Successfull, Welcome ');</script>";
-    SessionUtils::create_session($loggedUser['user_id']);
+    SessionUtils::create_session($loggedUser['user_id'],$loggedUser['display_name']);
     header('Location: '.'timeline.php');
 }
 ?>
+<style>
+    .nav-bar{
+        width: 100%;
+        height: 20%;
+        text-align: center;
+        background: blue;
+    }
+    .main{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+    label,input{
+        display: block;
+        margin-bottom: 20px;
+    }
+    button{
+        display: flex;
+        flex-direction: row;
+        align-self: center;
+
+    }
+</style>
 <body>
-    <h1>Login</h1>
+    <nav class="nav-bar">
+    <h1 style="color: white;">Login</h1>
+    </nav>
+    <div class="main">
     <p><?php 
         if (OutputUtils::errors_exist()) {
             $errors = OutputUtils::get_display_errors();
@@ -41,7 +68,6 @@ if(isset($_POST['submit'])){
             echo '</ul>';
         } ?>
     </p>
-    <div>
 
     <form action="#" method="post">
         <table>

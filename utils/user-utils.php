@@ -108,7 +108,7 @@ class SessionUtils {
         return GenericUtils::secure_random_string(100);
     }
     
-    static function create_session($user_id) {
+    static function create_session($user_id,$display_name) {
         // Example: clear all other sessions for this user...
         // $stmt = $db->prepare('UPDATE user_sessions SET is_valid=0 WHERE user_id=:user_id'); $stmt->execute(array(':user_id'=>$user_id));
 
@@ -127,10 +127,9 @@ class SessionUtils {
             ':create_time'=>$time,
             ':expire_time'=>$expire_time
         ));
-
         // Create session cookie
         setcookie('app_session_code', $session_code, $expire_time, '/');
-        setcookie('user_id',$user_id,$expire_time,'/');
+        setcookie('user_id',$display_name,$expire_time,'/');
     }
 
     static function check_user_login_status() {

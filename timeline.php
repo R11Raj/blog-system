@@ -16,6 +16,7 @@ require('queries.php');
     }
     .title{
         text-align: center;
+
     }
     .post-col{
         display: flex;
@@ -24,6 +25,7 @@ require('queries.php');
         align-items: center;
         background: brown;
         overflow: hidden;
+
     }
     .blog{
         border: 2px solid red;
@@ -33,19 +35,33 @@ require('queries.php');
         margin-bottom: 1%;
         padding: 1%;
     }
+    .user-function{
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
 
+    }
+    #logout{
+        width: 60px;
+        height: 30px;
+        align-self: center;
+        margin-right: 5%;
+        border-radius: 3px;
+    }
 </style>
 <body>
     <nav class="navbar">
         <h1 class="title">Timeline</h1>
-        <h4 style="margin-left: 10%;">Welcome,<?php echo $_COOKIE['user_id'];?></h4>
-        <a href="logout.php">Logout</a>
+        <div class="user-function">
+        <h3 style="text-align: center;">Welcome <?php echo $_COOKIE['user_id'];?></h3>&nbsp&nbsp
+        <button id="logout" type="button">Logout</button>
+        </div>
     </nav>
-    <div class="post-col" style="border: 2px solid green;">
+    <div class="post-col">
         <?php
         $posts=posts();
         foreach ($posts as $post) {
-            echo "<div class='blog' style=''>";
+            echo "<div class='blog'>";
             echo "<h3>".$post['post_header']."</h3>" ;
             echo "<p>".$post['content']."</p>";
             echo "<button>Like it</button>";
