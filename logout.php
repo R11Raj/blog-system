@@ -13,7 +13,7 @@
  */
 require_once (__DIR__.'/utils/database.php');
 $db = DatabaseUtils::get_connection();
-/*try{
+try{
     $user_id=$_COOKIE['user_id'];
     $stmt = $db->prepare('UPDATE user_sessions SET is_valid=0 WHERE user_id=:user_id;');
     $stmt->execute(array(':user_id'=>$user_id));
@@ -24,7 +24,7 @@ $db = DatabaseUtils::get_connection();
 catch(PDOException $e)
 {
     echo $stmt . "<br>" . $e->getMessage();
-}*/
+}
 ?>
 <style>
     .nav-bar{

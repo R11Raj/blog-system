@@ -58,7 +58,7 @@ require('queries.php');
     <nav class="navbar">
         <h1 class="title">Timeline</h1>
         <div class="user-function">
-        <h3 style="text-align: center;">Welcome <?php echo $_COOKIE['user_id'];?></h3>&nbsp&nbsp
+        <h3 style="text-align: center;">Welcome <?php echo $_COOKIE['display_name'];?></h3>&nbsp&nbsp
         <a id="logout" href="logout.php">Logout</a>
         </div>
     </nav>
