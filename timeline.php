@@ -75,7 +75,7 @@ require('utils/user-utils.php');
             echo "<div class='blog'>";
             echo "<h3>".$post['post_header']."</h3>" ;
             echo "<p>".$post['content']."</p>";
-            echo "<button>Like it</button>";
+            echo '<button onclick="'.PostUtils::add_like($post['post_id']).'">Like it</button>';
             echo "<span>".$post['likes']." Likes</span></div>";
         }
         ?>
