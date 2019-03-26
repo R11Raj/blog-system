@@ -16,23 +16,22 @@ class PostUtils{
     }
     static function add_like($post_id){
         $db=DatabaseUtils::get_connection();
-        echo $post_id;
-        echo "<script>console.log(2)</script>";
         try{
             //fetching post likes
             $stmt = $db->prepare("SELECT likes from posts WHERE post_id=:post_id;");
             $stmt->execute(array(':post_id'=>$post_id));
-            $post_likes=$stmt->fetch(PDO::FETCH_ASSOC);
+            $post=$stmt->fetch(PDO::FETCH_ASSOC);
             //incrementing post likes
-            ++$post_likes['likes'];
+            ++$post['likes'];
             //writing back to database
             $stmt = $db->prepare("UPDATE posts SET likes=:post_likes WHERE post_id=:post_id;");
             $stmt->execute(array(':post_id'=>$post_id
-            ,':post_likes'=>$post_likes['likes']));
+            ,':post_likes'=>$post['likes']));
         }catch(PDOException $e)
         {
             echo $stmt . "<br>" . $e->getMessage();
         }
+        return $post['likes'];
     }
 }
 ?>
