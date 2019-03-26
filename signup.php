@@ -18,7 +18,7 @@ if(isset($_POST['submit'])) {
     $cpassword = @$_POST['confirm_password'];
     function validate($name, $display_name,$email, $password, $cpassword)
     {
-        if (!preg_match("/^[a-zA-Z ]*$/", $name)) {
+        if (!preg_match("/^[a-zA-Z -]*$/", $name)) {
             OutputUtils::note_display_error("invalid first name");
         }
         if(strlen($password)<8){
@@ -42,13 +42,13 @@ if(isset($_POST['submit'])) {
         $password=password_hash($password,PASSWORD_BCRYPT);
         $result=UserUtils::add_user($name,$display_name,$email,$password);
         if($result){
-            OutputUtils::$page_mode='user added';
+            OutputUtils::set_page_mode('user added');
         }else{
-            OutputUtils::$page_mode='error';
+            OutputUtils::set_page_mode('error');
         }
     }
     else{
-        OutputUtils::$page_mode='error';
+        OutputUtils::set_page_mode('error');
     }
 }?>
   <style>
@@ -77,8 +77,8 @@ if(isset($_POST['submit'])) {
         </nav>
         <div class="main">
         <p><?php
-            $page_mode=OutputUtils::$page_mode;
-            if($page_mode=='error' || $page_mode=='form'){
+            $page_mode=OutputUtils::get_page_mode();
+            if($page_mode=='error' || $page_mode=='form' || $page_mode==''){
                 if(isset($_POST['submit']) && count(OutputUtils::get_display_errors())>0){
                     echo "Following errors are there:";
                     echo "<ul>";
