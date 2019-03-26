@@ -3,6 +3,7 @@
 <head>
     <title>Blog Sytem Log Out</title>
     <meta charset="utf-8">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"/>
 </head>
 <?php
 /**
@@ -28,18 +29,16 @@ catch(PDOException $e)
     .nav-bar{
         width: 100%;
         height: 20%;
-        text-align: center;
         background: blue;
-    }
-    .text{
-        text-align: center;
+        color:white;
     }
 </style>
 <body>
-<nav class="nav-bar">
-    <h1 style="color: white;">Logged Out</h1>
+<nav class="nav-bar text-center">
+    <h1 >Logged Out</h1>
 </nav>
-<h3 class="text">The user is logged out successfully..</h3>
-<h3 class="text">To login again <a href="login.php">click here..</a></h3>
-
+<div class="text-center">
+<h4 >The user is logged out successfully..</h4>
+<h4 >To login again <a href="login.php">click here..</a></h4>
+</div>
 </body>

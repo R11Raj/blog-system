@@ -7,34 +7,39 @@ require('utils/output-utils.php');
 <head>
     <title>Blog Sytem-Dashboard</title>
     <meta charset="utf-8">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"/>
 </head>
 <style>
     .nav-bar{
-        width: 100%;
         border: 2px solid black;
         background: blueviolet;
-    }
-    .center{
-        text-align: center;
+        color: white;
     }
     table{
         border: 2px solid black;
+        margin: 0px auto;
     }
     td, th {
         border: 1px solid #dddddd;
-        text-align: left;
         padding: 8px;
+    }
+    ul{
+        list-style-type: none;
+    }
 </style>
 <body>
 <nav class="nav-bar">
-    <h1 class="center">Dashboard</h1>
+    <h1 class="white-text text-center">Dashboard</h1>
 </nav>
-<h3>Search User</h3>
-<form action="dashboard.php" method="post">
+<h3 class="text-center">Search User</h3>
+<form action="dashboard.php" method="post" class="text-center">
     <label>Enter Display Name or Email ID</label><input type="text" required name="user_name">
-    <button type="submit">Search User</button>
+    <button type="submit" class="btn btn-default">Search User</button>
 </form>
 <?php
+    function add_permission(){
+        echo 'Hello';
+    }
     if(isset($_POST['user_name'])){
         $searched_user=SessionUtils::get_user_details($_POST['user_name']);
         if(!$searched_user){
@@ -44,7 +49,7 @@ require('utils/output-utils.php');
             }
         }
         else{
-            echo "<h3>User Found</h3>";
+            echo "<div class='text-center'><h3>User Found</h3>";
             echo "<h4>User ID: ".$searched_user['user_id']."</h4>";
             echo "<h4>Name: ".$searched_user['NAME']."</h4>";
             echo "<h4>Display Name: ".$searched_user['display_name']."</h4>";
@@ -52,31 +57,44 @@ require('utils/output-utils.php');
             $permissions=SessionUtils::user_permissions($searched_user['user_id']);
             if($permissions){
                 echo "<h4>User Permissions</h4><ul>";
+                echo "<table>";
                 foreach($permissions as $permission){
-                    echo "<li>".$permission['permission']."</li>";
+                    echo '<tr><td>';
+                    echo "<li>".$permission['permission'].'</td><td>'.'<a href="#">Delete</a>'."</td></li>";
+                    echo '</tr>';
                 }
+                echo "</table>";
                 echo "</ul>";
+                echo '<h3>Add Permission</h3><select>';
+                echo '<option value="create">Create</option>';
+                echo '<option value="delete">Delete</option>';
+                echo '<option value="edit">Edit</option>';
+                echo '<option value="select" selected>Select</option>';
+                echo '</select>';
+                echo '<button onclick="" class="btn btn-default">Add Permission</button></div>';
             }
         }
     }
 ?>
-<h3>Users</h3>
-<div class="users-list">
-    <?php
-    $users=SessionUtils::users_list();
-    echo '<table>';
-    echo '<tr><th>User ID</th>';
-    echo '<th>User Name</th>';
-    echo '<th>Display Name</th>';
-    echo '<th>Email ID</th></tr>';
-    foreach ($users as $user) {
-        echo "<tr>";
-        echo "<td>".$user['user_id']."</td>" ;
-        echo "<td>".$user['NAME']."</td>";
-        echo "<td>".$user['display_name']."</td>";
-        echo "<td>".$user['email']."</td></tr>";
-    }
-    echo '</table>';
-    ?>
+<div class="text-center">
+    <h3>Users</h3>
+    <div class="users-list">
+        <?php
+        $users=SessionUtils::users_list();
+        echo '<table>';
+        echo '<tr><th>User ID</th>';
+        echo '<th>User Name</th>';
+        echo '<th>Display Name</th>';
+        echo '<th>Email ID</th></tr>';
+        foreach ($users as $user) {
+            echo "<tr>";
+            echo "<td>".$user['user_id']."</td>" ;
+            echo "<td>".$user['NAME']."</td>";
+            echo "<td>".$user['display_name']."</td>";
+            echo "<td>".$user['email']."</td></tr>";
+        }
+        echo '</table>';
+        ?>
+</div>
 </div>
 </body>

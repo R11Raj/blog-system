@@ -189,5 +189,36 @@ class SessionUtils {
      *  echo 'hi there, ' . $user_info['name'] . '!';
      *
      */
-    
+    static function user_permissions($user_id){
+        $db = DatabaseUtils::get_connection();
+        $stmt = $db->prepare('SELECT permission FROM permissions WHERE user_id=:user_id');
+        $stmt->execute(array(':user_id'=>$user_id));
+        $permissions=$stmt->fetchAll(PDO::FETCH_ASSOC);
+        if(!$permissions)
+            return false;
+        //User has permissions
+        return $permissions;
+    }
+    static function users_list(){
+        $db = DatabaseUtils::get_connection();
+        $stmt = $db->prepare('SELECT user_id,NAME,display_name,email FROM users;');
+        $stmt->execute();
+        if(!$stmt->rowCount()){
+            OutputUtils::note_display_error('No users are there',1);
+            return false;
+        }
+        $result=$stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $result;
+    }
+    static function get_user_details($user_name){
+        $db = DatabaseUtils::get_connection();
+        $stmt = $db->prepare('SELECT user_id,NAME,display_name,email FROM users WHERE display_name=:user_name OR email=:user_name;');
+        $stmt->execute(array(':user_name'=> $user_name));
+        if($stmt->rowCount()==0){
+            OutputUtils::note_display_error('No Such User found');
+            return false;
+        }
+        $result=$stmt->fetch(PDO::FETCH_ASSOC);
+        return $result;
+    }
 }?>

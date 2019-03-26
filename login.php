@@ -29,13 +29,14 @@ if(isset($_POST['submit'])){
 <head>
     <title>Blog Sytem Log In</title>
     <meta charset="utf-8">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"/>
 </head>
 <style>
     .nav-bar{
         width: 100%;
         height: 20%;
-        text-align: center;
         background: blue;
+        color: white;
     }
     .main{
         display: flex;
@@ -51,7 +52,6 @@ if(isset($_POST['submit'])){
         display: flex;
         flex-direction: row;
         align-self: center;
-
     }
     ul{
         list-style-type: none;
@@ -59,8 +59,8 @@ if(isset($_POST['submit'])){
     }
 </style>
 <body>
-    <nav class="nav-bar">
-    <h1 style="color: white;">Login</h1>
+    <nav class="nav-bar text-center">
+    <h1>Login</h1>
     </nav>
     <div class="main">
     <p><?php 
@@ -84,7 +84,7 @@ if(isset($_POST['submit'])){
                 <td><label>Password</label></td><td><input type="password" required name="password"></td>
             </tr>
             <tr>
-                <td><button type="submit" name="submit">Login</button></td>
+                <td><button type="submit" name="submit" class="btn btn-default">Login</button></td>
             </tr>
         </table>
     </form>

@@ -3,20 +3,19 @@
 <head>
     <title>Blog Sytem-Timeline</title>
     <meta charset="utf-8">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"/>
 </head>
 <?php
 require('utils/post-utils.php');
 require('utils/user-utils.php');
 ?>
 <style>
-    .navbar{
-        width: 100%;
+    .nav-bar{
         border: 2px solid black;
         background: blueviolet;
+        color: white;
     }
-    .title{
-        text-align: center;
-    }
+
     .post-col{
         display: flex;
         flex-direction: column;
@@ -37,25 +36,19 @@ require('utils/user-utils.php');
         display: flex;
         flex-direction: row;
         justify-content: center;
-
     }
     #logout{
         align-self: center;
-        margin-right: 5%;
         display: block;
-        text-decoration: none;
-        width: 70px;
-        height: 25px;
         background: white;
         padding: 10px;
-        text-align: center;
         border-radius: 5px;
         color: black;
         font-weight: bold;
     }
 </style>
 <body>
-    <nav class="navbar">
+    <nav class="nav-bar text-center">
         <h1 class="title">Timeline</h1>
         <div class="user-function">
         <?php
@@ -65,7 +58,7 @@ require('utils/user-utils.php');
         }else{
             echo '<h3 style="text-align: center;">Welcome</h3>';
         }?>
-        <a id="logout" href="logout.php">Logout</a>
+        <a id="logout" class="btn btn-default" href="logout.php">Logout</a>
         </div>
     </nav>
     <div class="post-col">
@@ -75,6 +68,7 @@ require('utils/user-utils.php');
             echo "<div class='blog'>";
             echo "<h3>".$post['post_header']."</h3>" ;
             echo "<p>".$post['content']."</p>";
+
             echo '<button onclick="'.PostUtils::add_like($post['post_id']).'">Like it</button>';
             echo "<span>".$post['likes']." Likes</span></div>";
         }
