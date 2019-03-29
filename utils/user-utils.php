@@ -35,6 +35,11 @@ class UserUtils {
          }*/
     }
     
+    static function getPossiblePermissions() {
+        // return a pre-defined array
+        return array('write_post', 'edit_post', 'publish_post', 'moderate_comments');
+    }
+    
 }
 
 class SessionUtils {
