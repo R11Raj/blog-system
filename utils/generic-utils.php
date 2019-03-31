@@ -21,4 +21,10 @@ class GenericUtils {
         }
         return $str;
     }
+    public static function u($string="") {
+        return urlencode($string);
+    }
+    public static function h($string="") {
+        return htmlspecialchars($string);
+    }
 }?>

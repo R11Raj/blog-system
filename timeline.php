@@ -73,29 +73,30 @@ require('utils/user-utils.php');
         }
         ?>
     </div>
+    <script>
+        function add_like() {
+            var parent = this.parentElement;
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', 'add_like.php', true);
+            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+            xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+            xhr.onreadystatechange = function () {
+                if(xhr.readyState == 4 && xhr.status == 200) {
+                    var result = xhr.responseText;
+                    console.log('Result: ' + result);
+                    var element=parent.id;
+                    var id=element.split("-");
+                    document.getElementById("post-"+id[1]).innerHTML=result;
+                }
+            };
+            xhr.send("post_id="+parent.id);
+        }
+
+        var buttons = document.getElementsByClassName("like");
+        for(i=0; i < buttons.length; i++) {
+            buttons.item(i).addEventListener("click", add_like);
+        }
+
+    </script>
+
 </body>
-<script>
-    function add_like() {
-        var parent = this.parentElement;
-        var xhr = new XMLHttpRequest();
-        xhr.open('POST', 'add_like.php', true);
-        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-        xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-        xhr.onreadystatechange = function () {
-            if(xhr.readyState == 4 && xhr.status == 200) {
-                var result = xhr.responseText;
-                console.log('Result: ' + result);
-                var element=parent.id;
-                var id=element.split("-");
-                document.getElementById("post-"+id[1]).innerHTML=result;
-            }
-        };
-        xhr.send("post_id="+parent.id);
-    }
-
-    var buttons = document.getElementsByClassName("like");
-    for(i=0; i < buttons.length; i++) {
-        buttons.item(i).addEventListener("click", add_like);
-    }
-
-</script>

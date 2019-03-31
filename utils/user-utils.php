@@ -7,7 +7,7 @@
 
 require_once __DIR__ . '/database.php';
 require_once __DIR__ . '/generic-utils.php';
-
+require_once ('output-utils.php');
 class UserUtils {
 
     static function add_user($name,$display_name,$email,$password){
@@ -59,6 +59,10 @@ class UserUtils {
             echo $stmt . "<br>" . $e->getMessage();
         }
     }
+    static function getPossiblePermissions() {
+        // return a pre-defined array
+        return array('write_post', 'edit_post', 'publish_post', 'moderate_comments');
+    }
 }
 
 class SessionUtils {
@@ -105,7 +109,7 @@ class SessionUtils {
 
 
     static $user_info = null;
-    static $user_permissions = null;
+   // static $user_permissions = null;
 
     static function generate_session_code() {
         return GenericUtils::secure_random_string(100);
@@ -212,7 +216,7 @@ class SessionUtils {
     }
     static function get_user_details($user_name){
         $db = DatabaseUtils::get_connection();
-        $stmt = $db->prepare('SELECT user_id,NAME,display_name,email FROM users WHERE display_name=:user_name OR email=:user_name;');
+        $stmt = $db->prepare('SELECT user_id,NAME,display_name,email FROM users WHERE user_id=:user_name OR display_name=:user_name OR email=:user_name;');
         $stmt->execute(array(':user_name'=> $user_name));
         if($stmt->rowCount()==0){
             OutputUtils::note_display_error('No Such User found');
