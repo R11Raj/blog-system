@@ -15,6 +15,7 @@ $detailID = null;
 function processRequest() {
     global $pageMode, $detailID;
     $action = @$_GET['action'];
+
     if ($action == 'detail') {
         // get the user id
         $user_id = @$_GET['user_id'];
@@ -26,6 +27,7 @@ function processRequest() {
         }
     } elseif ($action == 'ajax') {
         $pageMode = 'ajax';
+
     }
 }
 processRequest();
@@ -37,11 +39,10 @@ if ($pageMode == 'ajax') {
     // do some magic processing
     // write out header
     header('Content-Type: application/json');
-    echo '<script>console.log(5);</script>';
     $ajaxAction = @$_GET['ajax_action']; // users.php?action=ajax&ajax_action=update_permissions
     // do all processing here etc
     // write out response
-    $output = array('valid'=>true, 'message'=>'Did some processing hey!');
+    $output = array('valid'=>@$_GET['userID'], 'message'=>@$_GET['permissions']);
     echo json_encode($output);
     exit; //<-- SUPER IMPORTANT
 }
@@ -50,7 +51,7 @@ if ($pageMode == 'ajax') {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="../jquery-3.3.1.js"></script>
     <title>Users detail</title>
 </head>
 <body>
@@ -59,7 +60,6 @@ if ($pageMode == 'ajax') {
 
 <?php if ($pageMode == 'master') {
     $users=SessionUtils::users_list();
-    $v='detail';
     // Full user table goes here
     ?>
     <table>
@@ -74,7 +74,7 @@ if ($pageMode == 'ajax') {
             <td><?php echo $user['NAME'];?></td>
             <td><?php echo $user['display_name'];?></td>
             <td><?php echo $user['email'];?></td>
-            <td><a class="action" href="<?php echo 'users.php?action='.GenericUtils::u($v).'&user_id='.$user['user_id']; ?>">Details</a></td>
+            <td><a class="action" href="<?php echo 'users.php?action='.GenericUtils::u('detail').'&user_id='.$user['user_id']; ?>">Details</a></td>
         </tr>
     <?php    } ?>
     </table>
@@ -119,12 +119,13 @@ if ($pageMode == 'ajax') {
                         foreach ($possiblePermissions as $permission) {
                             // add checkbox for each of those values, check based on in_array($currentPermissions, $permission)
                             if (in_array($permission,$currentPermissions)){
-                                echo '<input type="checkbox" checked>'.$permission;
+                                echo '<input type="checkbox" checked value="'.$permission.'" id="'.$permission.'">'.$permission;
                             }
                             else{
-                                echo '<input type="checkbox">'.$permission;
+                                echo '<input type="checkbox" value="'.$permission.'" id="'.$permission.'">'.$permission;
                             }
                         }
+
                         ?>
                     </form>
                 </div>
@@ -141,23 +142,44 @@ if ($pageMode == 'ajax') {
         // already have jquery
         $(function() {
             var checkboxes = $('#permission-form input[type=checkbox]');
-            checkboxes.click(function(){
+            checkboxes.click(function() {
                 // loop through all of the checkboxes and see which ones are selected; based on that, build a list
-               $.ajax('users,php?action=ajax&ajax_action=update_permissions', {
-                    method:'GET',
+                var checked_permissions = new Array();
+                $('input:checked').each(function () {
+                    checked_permissions.push($(this).val());
+                });
+                console.log(sList);
+                $.ajax('users.php?action=ajax&ajax_action=update_permissions',{
+                    type: 'GET',
                     data: {
                         userID:<?php echo $detailID;?>,
-                        permissions:'hello'
+                        permissions: checked_permissions
                     }
-                });.success(function(){
-                    // notify of success
-                    //alert('success');
-                }).fail(function(){
-                    // alert user of failture
+                    ,
+                    success: function () {
+                        alert('success ');
+                    },
+                    error: function (e) {
+                        alert('error');
+                    }
                 });
-
             });
-        });
+              /* $.ajax('users,php?action=ajax&ajax_action=update_permissions', {
+                   method: 'GET',
+                   dataType: 'json',
+                   data: {
+                       userID:,
+                       permissions: 'hello'
+                   },
+                   success: function () {
+                       // notify of success
+                       alert('success');
+                   },
+                   error: function (e) {
+                       alert('error');
+                   }
+               });*/
+            });
     </script>
 <?php } //end $pageMode switching ?>
 </body>
