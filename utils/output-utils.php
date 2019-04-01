@@ -20,5 +20,19 @@ class OutputUtils {
     static function get_display_errors() {
         return self::$display_errors;
     }
+
+    // Ajax response utils
+
+    static function writeAjaxSuccess($message, $data = null) {
+        header('Content-Type: application/json');
+        echo json_encode(array('valid'=>true, 'message'=>$message, 'data'=>$data));
+        exit();
+    }
+
+    static function writeAjaxError($message) {
+        header('Content-Type: application/json');
+        echo json_encode(array('valid'=>false, 'message'=>$message, 'data'=>null));
+        exit();
+    }
     
 }

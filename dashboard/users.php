@@ -68,6 +68,18 @@ if ($pageMode == 'ajax') {
 
 
     // Full user table goes here
+    
+    <table>
+        
+        <?php foreach ($rows as $row) { ?> 
+        <tr>
+            <td><?php echo $row['name']; ?></td>
+
+            <td><a href="users.php?action=detail&user_id=<?php echo $row['id']; ?>">Detail</a></td>
+        </tr>
+        <?php } ?>
+        
+    </table>
 
 
 <?php } elseif ($pageMode == 'detail') { ?>

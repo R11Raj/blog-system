@@ -40,6 +40,10 @@ class UserUtils {
         return array('write_post', 'edit_post', 'publish_post', 'moderate_comments');
     }
     
+    const PERMISSION_WRITE_POST = 'write_post';
+    const PERMISSION_EDIT_POST = 'edit_post';
+    ///TODO: finish that
+    
 }
 
 class SessionUtils {
