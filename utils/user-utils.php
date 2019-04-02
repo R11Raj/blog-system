@@ -9,6 +9,10 @@ require_once __DIR__ . '/database.php';
 require_once __DIR__ . '/generic-utils.php';
 require_once ('output-utils.php');
 class UserUtils {
+    const PERMISSION_WRITE_POST = 'write_post';
+    const PERMISSION_EDIT_POST = 'edit_post';
+    const PERMISSION_PUBLISH_POST = 'publish_post';
+    const PERMISSION_MODERATE_COMMENTS = 'moderate_comments';
 
     static function add_user($name,$display_name,$email,$password){
         $db = DatabaseUtils::get_connection();
@@ -62,6 +66,33 @@ class UserUtils {
     static function getPossiblePermissions() {
         // return a pre-defined array
         return array('write_post', 'edit_post', 'publish_post', 'moderate_comments');
+    }
+
+    static  function add_user_permissions($user_id,$permissions){
+        $db = DatabaseUtils::get_connection();
+        if($permissions!=null & $user_id!=null){
+            foreach ($permissions as $permission){
+                $stmt = $db->prepare( 'INSERT INTO permissions(user_id,permission) VALUES(:user_id,:permission);');
+                $stmt->execute(array(':user_id'=>$user_id,':permission'=>$permission));
+                if(!$db->lastInsertId()){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+    static  function delete_user_permissions($user_id,$permissions){
+        $db = DatabaseUtils::get_connection();
+        if($permissions!=null & $user_id!=null){
+            foreach ($permissions as $permission){
+                $stmt = $db->prepare( 'DELETE FROM permissions WHERE user_id=:user_id and permission=:permission;');
+                $stmt->execute(array(':user_id'=>$user_id,':permission'=>$permission));
+                if(!$stmt->rowCount()){
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }
 
@@ -157,7 +188,7 @@ class SessionUtils {
         // We seem to have valid session...
         $session_row = $stmt->fetch(PDO::FETCH_ASSOC);
         $user_id = $session_row['user_id'];
-        $stmt = $db->prepare('SELECT name, display_name, email FROM users WHERE user_id=:user_id');
+        $stmt = $db->prepare('SELECT user_id,name, display_name, email FROM users WHERE user_id=:user_id');
         $stmt->execute(array(':user_id'=>$user_id));
         if ($stmt->rowCount()==0)
             return false; // orphaned user session
@@ -177,6 +208,7 @@ class SessionUtils {
         $stmt->execute(array(':user_id'=>$user_id));
         $permissions=$stmt->fetchAll(PDO::FETCH_ASSOC);
         if(array_search($permission,$permissions))
+            echo '<script>console.log(34)</script>';
             return true;
         //User has permissions
         return false;

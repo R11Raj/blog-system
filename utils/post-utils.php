@@ -27,6 +27,7 @@ class PostUtils{
     }
     static function add_like($post_id){
         $db=DatabaseUtils::get_connection();
+
         try{
             //fetching post likes
             $stmt = $db->prepare("SELECT likes from posts WHERE post_id=:post_id;");
@@ -43,6 +44,20 @@ class PostUtils{
             echo $stmt . "<br>" . $e->getMessage();
         }
         return $post['likes'];
+    }
+    static function update_post($post_id,$content,$post_header){
+        $db=DatabaseUtils::get_connection();
+
+        try{
+            //updating post
+            $stmt = $db->prepare("UPDATE posts SET content=:content,post_header=:post_header  WHERE post_id=:post_id;");
+            $stmt->execute(array(':post_id'=>$post_id,':content'=>$content,':post_header'=>$post_header));
+            return true;
+        }catch(PDOException $e)
+        {
+            echo $e->getMessage();
+        }
+        return false;
     }
 }
 ?>

@@ -70,12 +70,43 @@ processRequest();
     <div class='text-center' id="<?php echo $searched_post['post_id'];?>"><h3>Post Found</h3>
         <h4 >Post ID: <?php echo $searched_post['post_id'];?></h4>
         <h4 >User ID: <?php echo $searched_post['user_id'];?></h4>
-        <h4>Content: <textarea ><?php echo $searched_post['content'];?></textarea></h4>
+        <h4>Content: <textarea id="edit"><?php echo $searched_post['content'];?></textarea></h4>
         <h4>likes: <?php echo $searched_post['likes'];?></h4>
-        <h4>Post header: <input type="text" value="<?php echo $searched_post['post_header'];?>"></h4>
-
+        <h4>Post header: <input id="edit" type="text" value="<?php echo $searched_post['post_header'];?>"></h4>
+        <button id="update-button" disabled>Update Post</button></div>
 
    <?php }
 }?>
+        <script>
+            // already have jquery
+            $(function() {
+                var update_button=$('#update-button');
+
+                $('input,textarea').change(function () {
+                    update_button.attr('disabled',false);
+                });
+                update_button.click(function () {
+                    var content=$('textarea').val();
+                    var post_header=$('input').val();
+                    console.log(post_header);
+                    var post_id=$(this).parent().attr('id');
+                    $.ajax('../ajax.php?action=edit_post',{
+                        method: 'GET',
+                        data:{
+                            post_id:post_id,
+                            content:content,
+                            post_header:post_header
+                        }
+                        ,
+                        success: function (response) {
+                            alert(response.message);
+                        },
+                        error: function (e) {
+                            alert('error');
+                        }
+                    });
+                });
+            });
+        </script>
 </body>
 </html>

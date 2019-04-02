@@ -28,5 +28,15 @@ class OutputUtils {
     static function set_page_mode($mode){
         self::$page_mode=$mode;
     }
+    static function writeAjaxSuccess($message, $data = null) {
+        header('Content-Type: application/json');
+        echo json_encode(array('valid'=>true, 'message'=>$message, 'data'=>$data));
+        exit();
+    }
+    static function writeAjaxError($message) {
+        header('Content-Type: application/json');
+        echo json_encode(array('valid'=>false, 'message'=>$message, 'data'=>null));
+        exit();
+    }
 }
 ?>

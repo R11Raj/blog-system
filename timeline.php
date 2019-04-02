@@ -3,6 +3,7 @@
 <head>
     <title>Blog Sytem-Timeline</title>
     <meta charset="utf-8">
+    <script src="jquery-3.3.1.js"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"/>
 </head>
 <?php
@@ -65,38 +66,35 @@ require('utils/user-utils.php');
         <?php
         $posts=PostUtils::posts();
         foreach ($posts as $post) {
-            echo "<div class='blog' id='blog-".$post['post_id']."'>";
+            echo "<div class='blog' id='".$post['post_id']."'>";
             echo "<h3>".$post['post_header']."</h3>" ;
             echo "<p>".$post['content']."</p>";
-            echo '<button id="'.$post['post_id'].'" class="like" >Like it</button>';
+            echo '<button class="like-button" >Like it</button>';
             echo "<span id='post-".$post['post_id']."'>".$post['likes']." Likes</span></div>";
         }
         ?>
     </div>
     <script>
-        function add_like() {
-            var parent = this.parentElement;
-            var xhr = new XMLHttpRequest();
-            xhr.open('POST', 'add_like.php', true);
-            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-            xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-            xhr.onreadystatechange = function () {
-                if(xhr.readyState == 4 && xhr.status == 200) {
-                    var result = xhr.responseText;
-                    console.log('Result: ' + result);
-                    var element=parent.id;
-                    var id=element.split("-");
-                    document.getElementById("post-"+id[1]).innerHTML=result;
-                }
-            };
-            xhr.send("post_id="+parent.id);
-        }
 
-        var buttons = document.getElementsByClassName("like");
-        for(i=0; i < buttons.length; i++) {
-            buttons.item(i).addEventListener("click", add_like);
-        }
-
+        $(function(){
+            var like_button=$('.like-button');
+            like_button.click(function () {
+                var post_id=$(this).parent().attr('id');
+                $.ajax('ajax.php?action=add_like',{
+                    method: 'GET',
+                    data: {
+                        post_id:post_id,
+                    },
+                    success: function (response) {
+                        console.log(response.data);
+                        document.getElementById("post-"+post_id).innerHTML=response.data+' Likes';
+                    },
+                    error: function (e) {
+                        alert('error');
+                    }
+                });
+            });
+        });
     </script>
 
 </body>

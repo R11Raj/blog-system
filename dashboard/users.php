@@ -42,8 +42,42 @@ if ($pageMode == 'ajax') {
     $ajaxAction = @$_GET['ajax_action']; // users.php?action=ajax&ajax_action=update_permissions
     // do all processing here etc
     // write out response
-    $output = array('valid'=>@$_GET['userID'], 'message'=>@$_GET['permissions']);
-    echo json_encode($output);
+    $user_id=@$_GET['userID'];
+    $permissions=@$_GET['permissions'];
+    $updated_permissions=@$_GET['updated_permissions'];
+
+    $userState = SessionUtils::check_user_login_status();
+    if (!$userState)
+        OutputUtils::writeAjaxError('Invalid login');
+    if (!SessionUtils::user_has_permissions(UserUtils::PERMISSION_EDIT_POST,$userState['user_id']))
+        OutputUtils::writeAjaxError('You cannot edit this post due to invalid permissions');
+
+
+    if($permissions==$updated_permissions){
+        OutputUtils::writeAjaxSuccess('successfull',$permissions);
+    }
+    else{
+        $permissions_to_be_deleted=array_diff($permissions, $updated_permissions);
+        $permissions_to_be_added=array_diff($updated_permissions,$permissions);
+        if(!empty($permissions_to_be_deleted)){
+            if(UserUtils::delete_user_permissions($user_id,$permissions_to_be_deleted)){
+                OutputUtils::writeAjaxSuccess('successfull',$updated_permissions);
+            }
+            else{
+                OutputUtils::writeAjaxError('failed');
+            }
+        }else if(!empty($permissions_to_be_added)){
+            if(UserUtils::add_user_permissions($user_id,$permissions_to_be_added)){
+                OutputUtils::writeAjaxSuccess('successfull',$updated_permissions);
+            }
+            else{
+                OutputUtils::writeAjaxError('failed');
+            }
+        }
+    }
+
+    /*$output = array('valid'=>@$_GET['userID'], 'message'=>@$_GET['permissions']);
+    echo json_encode($output);*/
     exit; //<-- SUPER IMPORTANT
 }
 ?>
@@ -125,9 +159,9 @@ if ($pageMode == 'ajax') {
                                 echo '<input type="checkbox" value="'.$permission.'" id="'.$permission.'">'.$permission;
                             }
                         }
-
                         ?>
                     </form>
+                    <button id="update-button" disabled>Update Permissions</button>
                 </div>
             </div>
 
@@ -142,44 +176,39 @@ if ($pageMode == 'ajax') {
         // already have jquery
         $(function() {
             var checkboxes = $('#permission-form input[type=checkbox]');
+            var update_button=$('#update-button');
+            var updated_permissions = new Array();
+            var permissions=new Array();
+            $('input:checked').each(function () {
+                permissions.push($(this).val());
+            });
             checkboxes.click(function() {
                 // loop through all of the checkboxes and see which ones are selected; based on that, build a list
-                var checked_permissions = new Array();
+                updated_permissions=[];
                 $('input:checked').each(function () {
-                    checked_permissions.push($(this).val());
+                    updated_permissions.push($(this).val());
                 });
-                console.log(sList);
-                $.ajax('users.php?action=ajax&ajax_action=update_permissions',{
-                    type: 'GET',
-                    data: {
-                        userID:<?php echo $detailID;?>,
-                        permissions: checked_permissions
-                    }
-                    ,
-                    success: function () {
-                        alert('success ');
-                    },
-                    error: function (e) {
-                        alert('error');
-                    }
+                update_button.attr('disabled',false);
+            });
+            update_button.click(function () {
+                    $.ajax('users.php?action=ajax&ajax_action=update_permissions',{
+                        method: 'GET',
+                        data: {
+                            userID:<?php echo $detailID;?>,
+                            permissions: permissions,
+                            updated_permissions:updated_permissions
+                        }
+                        ,
+                        success: function () {
+                            alert('User Permissions Updated successfully');
+                        },
+                        error: function (e) {
+                            alert('error');
+                        }
+                    });
                 });
             });
-              /* $.ajax('users,php?action=ajax&ajax_action=update_permissions', {
-                   method: 'GET',
-                   dataType: 'json',
-                   data: {
-                       userID:,
-                       permissions: 'hello'
-                   },
-                   success: function () {
-                       // notify of success
-                       alert('success');
-                   },
-                   error: function (e) {
-                       alert('error');
-                   }
-               });*/
-            });
+
     </script>
 <?php } //end $pageMode switching ?>
 </body>
