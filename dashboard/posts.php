@@ -30,19 +30,29 @@ processRequest();
 <head>
     <meta charset="UTF-8">
     <script src="../jquery-3.3.1.js"></script>
-    <title>Posts detail</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <title>Posts Panel</title>
 </head>
+<style>
+    table{
+        margin: auto;
+
+    }
+</style>
 <body>
+<h1 class="text-primary text-center bg-dark">Posts Panel</h1>
 <?php if ($pageMode == 'master') {
     $posts=PostUtils::posts();
     // Full post table goes here
     ?>
-    <table>
+    <br>
+    <table border="1px solid black" class="text-center" cellpadding="10px">
         <tr><th>Post ID</th>
             <th>User ID</th>
             <th>Content</th>
             <th>Likes</th>
             <th>Post Header</th>
+            <th></th>
         </tr>
         <?php    foreach ($posts as $post) { ?>
             <tr>
@@ -67,13 +77,34 @@ processRequest();
             echo "<h3>".$error['message']."</h3>";
         }
     }else{ ?>
-    <div class='text-center' id="<?php echo $searched_post['post_id'];?>"><h3>Post Found</h3>
-        <h4 >Post ID: <?php echo $searched_post['post_id'];?></h4>
-        <h4 >User ID: <?php echo $searched_post['user_id'];?></h4>
-        <h4>Content: <textarea id="edit"><?php echo $searched_post['content'];?></textarea></h4>
-        <h4>likes: <?php echo $searched_post['likes'];?></h4>
-        <h4>Post header: <input id="edit" type="text" value="<?php echo $searched_post['post_header'];?>"></h4>
-        <button id="update-button" disabled>Update Post</button></div>
+
+            <div class="col-md-12" id="<?php echo $searched_post['post_id'];?>"><h3 class='text-center'>Post Found</h3>
+                <table cellpadding="10px">
+                    <tr>
+                        <td><h5>Post ID: </h5></td>
+                        <td class="text-info"><h6><?php echo $searched_post['post_id'];?></h6></td>
+                    </tr>
+                    <tr>
+                        <td><h5>User ID: </h5></td>
+                        <td class="text-info"><h6><?php echo $searched_post['user_id'];?></h6></td>
+                    </tr>
+                    <tr>
+                        <td><h5>Post header: </h5></td>
+                        <td class="text-info"><h7><input id="edit" type="text" value="<?php echo $searched_post['post_header'];?>"></h7></td>
+                    </tr>
+                    <tr>
+                        <td><h5>Content: </h5></td>
+                        <td class="text-info"><h7><textarea id="edit"><?php echo $searched_post['content'];?></textarea></h7></td>
+                    </tr>
+                    <tr>
+                        <td><h5>likes: </h5></td>
+                        <td class="text-info"><h6><?php echo $searched_post['likes'];?></h6></td>
+                    </tr>
+                    <tr>
+                        <td><button id="update-button" class="btn btn-success" disabled>Update Post</button></td>
+                    </tr>
+                </table>
+            </div>
 
    <?php }
 }?>
@@ -86,25 +117,27 @@ processRequest();
                     update_button.attr('disabled',false);
                 });
                 update_button.click(function () {
-                    var content=$('textarea').val();
-                    var post_header=$('input').val();
-                    console.log(post_header);
-                    var post_id=$(this).parent().attr('id');
-                    $.ajax('../ajax.php?action=edit_post',{
-                        method: 'GET',
-                        data:{
-                            post_id:post_id,
-                            content:content,
-                            post_header:post_header
-                        }
-                        ,
-                        success: function (response) {
-                            alert(response.message);
-                        },
-                        error: function (e) {
-                            alert('error');
-                        }
-                    });
+                    if(confirm('Are you sure you want to update the post?')){
+                        var content=$('textarea').val();
+                        var post_header=$('input').val();
+                        console.log(post_header);
+                        var post_id=$(this).parent().attr('id');
+                        $.ajax('../ajax.php?action=edit_post',{
+                            method: 'GET',
+                            data:{
+                                post_id:post_id,
+                                content:content,
+                                post_header:post_header
+                            }
+                            ,
+                            success: function (response) {
+                                alert(response.message);
+                            },
+                            error: function (e) {
+                                alert('error');
+                            }
+                        });
+                    }
                 });
             });
         </script>

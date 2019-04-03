@@ -84,7 +84,7 @@ if(isset($_POST['submit'])){
                 <td><label>Password</label></td><td><input type="password" required name="password"></td>
             </tr>
             <tr>
-                <td><button type="submit" name="submit" class="btn btn-default">Login</button></td>
+                <td><button type="submit" name="submit" class="btn btn-success">Login</button></td>
             </tr>
         </table>
     </form>

@@ -68,7 +68,7 @@ if ($pageMode == 'ajax') {
             }
         }else if(!empty($permissions_to_be_added)){
             if(UserUtils::add_user_permissions($user_id,$permissions_to_be_added)){
-                OutputUtils::writeAjaxSuccess('successfull',$updated_permissions);
+                OutputUtils::writeAjaxSuccess('User permissions updated successfully',$updated_permissions);
             }
             else{
                 OutputUtils::writeAjaxError('failed');
@@ -86,21 +86,32 @@ if ($pageMode == 'ajax') {
 <head>
     <meta charset="UTF-8">
     <script src="../jquery-3.3.1.js"></script>
-    <title>Users detail</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <title>Users Panel</title>
 </head>
+<style>
+    table{
+        margin: auto;
+
+    }
+    .bg-dark{
+        height: 20%;
+    }
+</style>
 <body>
-
 <!-- master / detail for users -->
-
+<h1 class="text-primary text-center bg-dark">Users Panel</h1>
 <?php if ($pageMode == 'master') {
     $users=SessionUtils::users_list();
     // Full user table goes here
     ?>
-    <table>
+    <br>
+    <table border="1px solid black" class="text-center" cellpadding="10px">
         <tr><th>User ID</th>
             <th>User Name</th>
             <th>Display Name</th>
             <th>Email ID</th>
+            <th></th>
         </tr>
     <?php    foreach ($users as $user) { ?>
         <tr>
@@ -121,25 +132,39 @@ if ($pageMode == 'ajax') {
     if(!$searched_user){
         $errors=OutputUtils::get_display_errors();
         foreach ($errors as $error){
-            echo "<h3>".$error['message']."</h3>";
+            echo "<br><h3 class='text-center'>".$error['message']."</h3>";
         }
     }
     else{ ?>
-        <div class='text-center' id="<?php echo $searched_user['user_id'];?>"><h3>User Found</h3>
-        <h4 >User ID: <?php echo $searched_user['user_id'];?></h4>
-        <h4>Name: <?php echo $searched_user['NAME'];?></h4>
-        <h4>Display Name: <?php echo $searched_user['display_name'];?></h4>
-        <h4>Email ID: <?php echo $searched_user['email'];?></h4>
+        <div id="<?php echo $searched_user['user_id'];?>"><h3 class="text-center">User Found!!</h3><br>
+        <table cellpadding="10px">
+        <tr>
+            <td><h5>User ID: </h5></td>
+            <td class="text-info"><h6><?php echo $searched_user['user_id'];?></h6></td>
+        </tr>
+        <tr>
+            <td><h5>Name: </h5></td>
+            <td class="text-info"><h6><?php echo $searched_user['NAME'];?></h6></td>
+        </tr>
+        <tr>
+            <td><h5>Display Name: </h5></td>
+            <td class="text-info"><h6><?php echo $searched_user['display_name'];?></h6></td>
+        </tr>
+        <tr>
+            <td><h5>Email ID: </h5></td>
+            <td class="text-info"><h6><?php echo $searched_user['email'];?></h6></td>
+        </tr>
+        </table>
 
-    // Include form for updating role, permissions etc
-
+        <br>
         <div class="container">
-
             <div class="row">
-                <div class="col-md-12">
+                <div class="col-md-12 text-center">
 
-                    <h2>Permissions</h2>
+                    <h2 >Permissions</h2>
+                    <br>
                     <p>Check/uncheck boxes for various permissions:</p>
+
                     <form action="" id="permission-form">
                         <?php
                         $rows = SessionUtils::user_permissions($detailID);
@@ -158,13 +183,14 @@ if ($pageMode == 'ajax') {
                             else{
                                 echo '<input type="checkbox" value="'.$permission.'" id="'.$permission.'">'.$permission;
                             }
+                            echo '&nbsp&nbsp&nbsp';
                         }
                         ?>
                     </form>
-                    <button id="update-button" disabled>Update Permissions</button>
+                    <br>
+                    <button id="update-button" class="btn btn-success" disabled>Update Permissions</button>
                 </div>
             </div>
-
         </div>
     <?php } ?>
 
@@ -191,23 +217,26 @@ if ($pageMode == 'ajax') {
                 update_button.attr('disabled',false);
             });
             update_button.click(function () {
-                    $.ajax('users.php?action=ajax&ajax_action=update_permissions',{
+                if(confirm('Are you sure you want to update the permissions?')) {
+
+                    $.ajax('users.php?action=ajax&ajax_action=update_permissions', {
                         method: 'GET',
                         data: {
                             userID:<?php echo $detailID;?>,
                             permissions: permissions,
-                            updated_permissions:updated_permissions
+                            updated_permissions: updated_permissions
                         }
                         ,
-                        success: function () {
-                            alert('User Permissions Updated successfully');
+                        success: function (response) {
+                            alert(response.message);
                         },
                         error: function (e) {
                             alert('error');
                         }
                     });
-                });
+                }
             });
+        });
 
     </script>
 <?php } //end $pageMode switching ?>
