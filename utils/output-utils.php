@@ -29,13 +29,15 @@ class OutputUtils {
         self::$page_mode=$mode;
     }
     static function writeAjaxSuccess($message, $data = null) {
-        header('Content-Type: application/json');
-        echo json_encode(array('valid'=>true, 'message'=>$message, 'data'=>$data));
+        header('Content-Type: application/jsonp');
+        $response=array('valid'=>true, 'message'=>$message, 'data'=>$data);
+        echo json_encode($response);
         exit();
     }
     static function writeAjaxError($message) {
-        header('Content-Type: application/json');
-        echo json_encode(array('valid'=>false, 'message'=>$message, 'data'=>null));
+        header('Content-Type: application/jsonp');
+        $response=array('valid'=>false, 'message'=>$message, 'data'=>null);
+        echo json_encode($response);
         exit();
     }
 }

@@ -188,7 +188,7 @@ class SessionUtils {
         // We seem to have valid session...
         $session_row = $stmt->fetch(PDO::FETCH_ASSOC);
         $user_id = $session_row['user_id'];
-        $stmt = $db->prepare('SELECT user_id,name, display_name, email FROM users WHERE user_id=:user_id');
+        $stmt = $db->prepare('SELECT user_id,name, display_name, email,role FROM users WHERE user_id=:user_id');
         $stmt->execute(array(':user_id'=>$user_id));
         if ($stmt->rowCount()==0)
             return false; // orphaned user session
@@ -208,7 +208,6 @@ class SessionUtils {
         $stmt->execute(array(':user_id'=>$user_id));
         $permissions=$stmt->fetchAll(PDO::FETCH_ASSOC);
         if(array_search($permission,$permissions))
-            echo '<script>console.log(34)</script>';
             return true;
         //User has permissions
         return false;

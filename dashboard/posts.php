@@ -78,7 +78,7 @@ processRequest();
         }
     }else{ ?>
 
-            <div class="col-md-12" id="<?php echo $searched_post['post_id'];?>"><h3 class='text-center'>Post Found</h3>
+            <div class="col-md-12 update-inputs"><h3 class='text-center'>Post Found</h3>
                 <table cellpadding="10px">
                     <tr>
                         <td><h5>Post ID: </h5></td>
@@ -101,7 +101,7 @@ processRequest();
                         <td class="text-info"><h6><?php echo $searched_post['likes'];?></h6></td>
                     </tr>
                     <tr>
-                        <td><button id="update-button" class="btn btn-success" disabled>Update Post</button></td>
+                        <td id="<?php echo $searched_post['post_id'];?>"><button id="update-button" class="btn btn-success" disabled>Update Post</button></td>
                     </tr>
                 </table>
             </div>
@@ -113,28 +113,30 @@ processRequest();
             $(function() {
                 var update_button=$('#update-button');
 
-                $('input,textarea').change(function () {
+                $('.update-inputs').find('input,textarea').change(function () {
                     update_button.attr('disabled',false);
                 });
                 update_button.click(function () {
                     if(confirm('Are you sure you want to update the post?')){
-                        var content=$('textarea').val();
-                        var post_header=$('input').val();
-                        console.log(post_header);
+                        var content=$('.update-inputs').find('textarea').val();
+                        var post_header=$('.update-inputs').find('input').val();
                         var post_id=$(this).parent().attr('id');
+                        console.log(post_id);
                         $.ajax('../ajax.php?action=edit_post',{
-                            method: 'GET',
+                            method: 'POST',
                             data:{
                                 post_id:post_id,
                                 content:content,
                                 post_header:post_header
                             }
                             ,
-                            success: function (response) {
+                            success: function (response_json) {
+                                response=JSON.parse(response_json);
                                 alert(response.message);
+                                update_button.attr('disabled',true);
                             },
-                            error: function (e) {
-                                alert('error');
+                            error: function (jqXHR, textStatus, errorThrown ) {
+                                console.log( 'Could not get posts, server response: ' + textStatus + ': ' + errorThrown );
                             }
                         });
                     }

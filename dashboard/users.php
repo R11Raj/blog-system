@@ -42,26 +42,30 @@ if ($pageMode == 'ajax') {
     $ajaxAction = @$_GET['ajax_action']; // users.php?action=ajax&ajax_action=update_permissions
     // do all processing here etc
     // write out response
-    $user_id=@$_GET['userID'];
-    $permissions=@$_GET['permissions'];
-    $updated_permissions=@$_GET['updated_permissions'];
+    $user_id=@$_POST['userID'];
+    $permissions=@$_POST['permissions'];
+    $updated_permissions=@$_POST['updated_permissions'];
 
     $userState = SessionUtils::check_user_login_status();
     if (!$userState)
         OutputUtils::writeAjaxError('Invalid login');
-    if (!SessionUtils::user_has_permissions(UserUtils::PERMISSION_EDIT_POST,$userState['user_id']))
-        OutputUtils::writeAjaxError('You cannot edit this post due to invalid permissions');
-
+   /* if (!SessionUtils::user_has_permissions(UserUtils::PERMISSION_EDIT_POST,$userState['user_id']))
+        OutputUtils::writeAjaxError('You cannot edit this post due to invalid permissions');*/
+    if($userState['role']!='admin'){
+        OutputUtils::writeAjaxError('You Don\'t have the required permissions to update');
+        exit();
+    }
 
     if($permissions==$updated_permissions){
-        OutputUtils::writeAjaxSuccess('successfull',$permissions);
+        OutputUtils::writeAjaxSuccess('User permissions updated successfully',$permissions);
     }
     else{
         $permissions_to_be_deleted=array_diff($permissions, $updated_permissions);
         $permissions_to_be_added=array_diff($updated_permissions,$permissions);
+
         if(!empty($permissions_to_be_deleted)){
             if(UserUtils::delete_user_permissions($user_id,$permissions_to_be_deleted)){
-                OutputUtils::writeAjaxSuccess('successfull',$updated_permissions);
+                OutputUtils::writeAjaxSuccess('User permissions updated successfully',$updated_permissions);
             }
             else{
                 OutputUtils::writeAjaxError('failed');
@@ -69,15 +73,13 @@ if ($pageMode == 'ajax') {
         }else if(!empty($permissions_to_be_added)){
             if(UserUtils::add_user_permissions($user_id,$permissions_to_be_added)){
                 OutputUtils::writeAjaxSuccess('User permissions updated successfully',$updated_permissions);
+
             }
             else{
                 OutputUtils::writeAjaxError('failed');
             }
         }
     }
-
-    /*$output = array('valid'=>@$_GET['userID'], 'message'=>@$_GET['permissions']);
-    echo json_encode($output);*/
     exit; //<-- SUPER IMPORTANT
 }
 ?>
@@ -169,9 +171,12 @@ if ($pageMode == 'ajax') {
                         <?php
                         $rows = SessionUtils::user_permissions($detailID);
                         $currentPermissions = array();
-                        foreach ($rows as $row) {
-                            $currentPermissions[] = $row['permission'];
+                        if(!empty($rows)){
+                            foreach ($rows as $row) {
+                                $currentPermissions[] = $row['permission'];
+                            }
                         }
+
                         // possible permission list... should be stored in UserUtils class...
                         $possiblePermissions = UserUtils::getPossiblePermissions();
                         // Loop through all of the permissions
@@ -220,19 +225,24 @@ if ($pageMode == 'ajax') {
                 if(confirm('Are you sure you want to update the permissions?')) {
 
                     $.ajax('users.php?action=ajax&ajax_action=update_permissions', {
-                        method: 'GET',
+                        method: 'POST',
                         data: {
                             userID:<?php echo $detailID;?>,
                             permissions: permissions,
                             updated_permissions: updated_permissions
                         }
                         ,
-                        success: function (response) {
+                        success: function (response_json) {
+                            response=JSON.parse(response_json);
+                            permissions=response.data;
                             alert(response.message);
+                            update_button.attr('disabled',true);
                         },
-                        error: function (e) {
+                        error:function(jqXHR, textStatus, errorThrown ) {
+                        console.log( 'Could not get posts, server response: ' + textStatus + ': ' + errorThrown );}
+                      /*  error: function (e) {
                             alert('error');
-                        }
+                        }*/
                     });
                 }
             });

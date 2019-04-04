@@ -8,7 +8,6 @@ function processRequest()
     $action = @$_GET['action'];
     if ($action == 'edit_post') {
 
-        header('Content-Type: application/json');
         // Verify the user
         $userState = SessionUtils::check_user_login_status();
         if (!$userState)
@@ -17,9 +16,9 @@ function processRequest()
             OutputUtils::writeAjaxError('You cannot edit this post due to invalid permissions');
 
         // 1. grab all of the fields - post_id, title, content, etc
-        $post_id=@$_GET['post_id'];
-        $content=@$_GET['content'];
-        $post_header=@$_GET['post_header'];
+        $post_id=@$_POST['post_id'];
+        $content=@$_POST['content'];
+        $post_header=@$_POST['post_header'];
         // 1.5. verify all of the fields
         function validate($post_id,$content,$post_header){
             if(!is_numeric($post_id)){
@@ -57,7 +56,6 @@ function processRequest()
     //
     //    });
     if($action=='add_like'){
-        header('Content-Type: application/json');
         if(isset($_GET['post_id'])) {
 
             $post_id = @$_GET['post_id'];

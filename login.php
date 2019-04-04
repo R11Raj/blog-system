@@ -18,6 +18,11 @@ if(isset($_POST['submit'])){
     }
     else{
         SessionUtils::create_session($loggedUser['user_id'],$loggedUser['display_name']);
+        if($loggedUser['role']=='admin')
+        {
+            header('Location: '.'dashboard/index.php');
+            exit();
+        }
         header('Location: '.'timeline.php');
         exit();
     }
