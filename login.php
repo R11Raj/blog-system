@@ -86,8 +86,8 @@ if(isset($_POST['submit'])){
         }
         /*Step 1: Enter Credentials*/
         $fb = new \Facebook\Facebook([
-            'app_id' => '519936365202713',
-            'app_secret' => 'a415918ba3ffaf2f7cd2f32a2a92c8a9',
+            'app_id' => '*****************',
+            'app_secret' => '**************',
             'default_graph_version' => 'v2.10',
             //'default_access_token' => '{access-token}', // optional
         ]);
