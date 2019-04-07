@@ -21,13 +21,56 @@ if ($user_info['role']!='admin'){
         background: blue;
         color: white;
     }
-
+    .tab{
+        display:block;
+        height: 10em;
+        width: 15em;
+        background-color: black;
+        margin: auto;
+        color: white;
+        margin-top: 10%;
+        font-size: 25px;
+    }
+    .box-container{
+        display: flex;
+    }
+    .tab:hover{
+        text-decoration: none;
+    }
+    body{
+        background-color: burlywood;
+    }
 </style>
 <body>
 <nav class="nav-bar text-center">
     <h1>Admin Panel</h1>
+    <div class="user-function">
+        <?php
+        $user_info=SessionUtils::check_user_login_status();
+        if($user_info){
+            echo '<h3 style="text-align: center;">Welcome '.$user_info['display_name'].'</h3>';
+        }
+        ?>
+        <a id="logout" class="btn btn-default like" href="logout.php">Logout</a>
+    </div>
 </nav>
-<div>
+<div class="box-container row text-center">
+        <a class="tab" href="../timeline.php">
 
+                Timeline
+
+        </a>
+        <a class="tab" href="users.php">
+
+                User Panel
+
+        </a>
+        <a class="tab" href="posts.php">
+
+                Post Panel
+
+        </a>
 </div>
+
+
 </body>

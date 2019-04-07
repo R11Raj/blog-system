@@ -94,6 +94,62 @@ class UserUtils {
         }
         return true;
     }
+    static function associate_facebook_account($email,$outh_provider,$outh_token,$outh_uid){
+        $db = DatabaseUtils::get_connection();
+        try{
+            $stmt = $db->prepare( 'UPDATE users SET outh_provider=:outh_provider,$outh_token=:outh_token,$outh_uid=:outh_uid WHERE email=:email;');
+            $stmt->execute(array(':outh_provider'=>$outh_provider,':email'=>$email,':outh_token'=>$outh_token,':outh_uid'=>$outh_uid));
+            if($stmt->rowCount()!=1)
+                return false;
+
+            return true;
+        }
+        catch(PDOException $e)
+        {
+            echo $stmt . "<br>" . $e->getMessage();
+        }
+    }
+    static function check_outh_uid($outh_provider,$outh_uid,$outh_token){
+        $db = DatabaseUtils::get_connection();
+        try{
+            $stmt = $db->prepare( 'SELECT user_id FROM users WHERE outh_uid=:outh_uid AND outh_provider=:outh_provider;');
+            $stmt->execute(array(':outh_provider'=>$outh_provider,':outh_uid'=>$outh_uid));
+            if($stmt->rowCount()!=1)
+                return false;
+            $user=$stmt->fetch(PDO::FETCH_ASSOC);
+            $stmt=$db->prepare('UPDATE users SET outh_token WHERE user_id=:user_id');
+            $stmt->execute(array(':user_id'=>$user['user_id'],':outh_token'=>$outh_token));
+            if($stmt->rowCount()!=1){
+                return false;
+            }
+            return $user['user_id'];
+        }
+        catch(PDOException $e)
+        {
+            echo $stmt . "<br>" . $e->getMessage();
+        }
+    }
+    static function add_user_using_facebook($name,$display_name,$email,$outh_provider,$outh_token,$outh_uid){
+        $db = DatabaseUtils::get_connection();
+        try{
+            $stmt = $db->prepare( 'INSERT INTO users (name, display_name, email,outh_provider,outh_token,outh_uid,role) VALUES (:name, :display_name, :email, :outh_provider,:outh_token,:outh_uid,:role);' );
+            $params = array(
+                ':name'=>$name,
+                ':display_name'=>$display_name,
+                ':email'=>$email,
+                ':$outh_provider'=>$outh_provider,':outh_token'=>$outh_token,'outh_uid'=>$outh_uid,
+                ':role'=>'normal');
+            $stmt->execute($params);
+            if($db->lastInsertId()){
+                return true;
+            }
+            return false;
+        }
+        catch(PDOException $e)
+        {
+            echo $stmt . "<br>" . $e->getMessage();
+        }
+    }
 }
 
 class SessionUtils {
@@ -146,7 +202,7 @@ class SessionUtils {
         return GenericUtils::secure_random_string(100);
     }
     
-    static function create_session($user_id,$display_name) {
+    static function create_session($user_id) {
         // Example: clear all other sessions for this user...
         // $stmt = $db->prepare('UPDATE user_sessions SET is_valid=0 WHERE user_id=:user_id'); $stmt->execute(array(':user_id'=>$user_id));
 

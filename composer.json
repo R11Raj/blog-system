@@ -1,0 +1,15 @@
+{
+    "name": "raj/blog_system",
+    "description": "This is simple bog system to share ideas",
+    "type": "project",
+    "license": "GPL 1.0",
+    "authors": [
+        {
+            "name": "Raj Prajapati",
+            "email": "prajapatiraj.97@gmail.com"
+        }
+    ],
+    "require": {
+        "facebook/graph-sdk": "^5.7"
+    }
+}

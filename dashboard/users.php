@@ -103,6 +103,7 @@ if ($pageMode == 'ajax') {
 <body>
 <!-- master / detail for users -->
 <h1 class="text-primary text-center bg-dark">Users Panel</h1>
+
 <?php if ($pageMode == 'master') {
     $users=SessionUtils::users_list();
     // Full user table goes here
