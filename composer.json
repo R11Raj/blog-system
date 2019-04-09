@@ -2,7 +2,7 @@
     "name": "raj/blog_system",
     "description": "This is simple bog system to share ideas",
     "type": "project",
-    "license": "GPL 1.0",
+    "license": "MIT 1.0",
     "authors": [
         {
             "name": "Raj Prajapati",

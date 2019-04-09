@@ -112,19 +112,19 @@ if(isset($_POST['submit'])){
             }
         }
         if(UserUtils::check_email_availibility($fb_user['email'])){
-            if(!UserUtils::associate_facebook_account($fb_user['email'],'facebook',$access_token,$fb_user['id'])){
+            if(!UserUtils::associate_facebook_account($fb_user['email'],$access_token,$fb_user['id'])){
                 OutputUtils::note_display_error('facebook account linking error');
                 exit();
             }
             echo '<script>alert("facebook account linked successfully");</script>';
         }
         else{
-            $uid=UserUtils::check_outh_uid('facebook',$fb_user['id'],$access_token);
+            $uid=UserUtils::check_outh_uid(UserUtils::LOGIN_PROVIDER_FACEBOOK,$fb_user['id'],$access_token);
             if($uid){
                 SessionUtils::create_session($uid);
             }
             else{
-                if(!UserUtils::add_user_using_facebook($fb_user['first_name'],$fb_user['name'],$fb_user['email'],'facebook',$access_token,$fb_user['id'])){
+                if(!UserUtils::add_user_using_facebook($fb_user['first_name'],$fb_user['name'],$fb_user['email'],$access_token,$fb_user['id'])){
                     OutputUtils::note_display_error('user not added some error occured');
                 }
                 else{

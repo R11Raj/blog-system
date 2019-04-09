@@ -13,7 +13,7 @@ class UserUtils {
     const PERMISSION_EDIT_POST = 'edit_post';
     const PERMISSION_PUBLISH_POST = 'publish_post';
     const PERMISSION_MODERATE_COMMENTS = 'moderate_comments';
-
+    const LOGIN_PROVIDER_FACEBOOK = 'facebook';
     static function add_user($name,$display_name,$email,$password){
         $db = DatabaseUtils::get_connection();
         try{
@@ -94,11 +94,11 @@ class UserUtils {
         }
         return true;
     }
-    static function associate_facebook_account($email,$outh_provider,$outh_token,$outh_uid){
+    static function associate_facebook_account($email,$outh_token,$outh_uid){
         $db = DatabaseUtils::get_connection();
         try{
             $stmt = $db->prepare( 'UPDATE users SET outh_provider=:outh_provider,$outh_token=:outh_token,$outh_uid=:outh_uid WHERE email=:email;');
-            $stmt->execute(array(':outh_provider'=>$outh_provider,':email'=>$email,':outh_token'=>$outh_token,':outh_uid'=>$outh_uid));
+            $stmt->execute(array(':outh_provider'=>self::LOGIN_PROVIDER_FACEBOOK,':email'=>$email,':outh_token'=>$outh_token,':outh_uid'=>$outh_uid));
             if($stmt->rowCount()!=1)
                 return false;
 
@@ -109,16 +109,16 @@ class UserUtils {
             echo $stmt . "<br>" . $e->getMessage();
         }
     }
-    static function check_outh_uid($outh_provider,$outh_uid,$outh_token){
+    static function check_outh_uid($oauth_provider,$oauth_uid,$oauth_token){
         $db = DatabaseUtils::get_connection();
         try{
-            $stmt = $db->prepare( 'SELECT user_id FROM users WHERE outh_uid=:outh_uid AND outh_provider=:outh_provider;');
-            $stmt->execute(array(':outh_provider'=>$outh_provider,':outh_uid'=>$outh_uid));
+            $stmt = $db->prepare( 'SELECT user_id FROM users WHERE oauth_uid=:oauth_uid AND oauth_provider=:oauth_provider;');
+            $stmt->execute(array(':oauth_provider'=>$oauth_provider,':oauth_uid'=>$oauth_uid));
             if($stmt->rowCount()!=1)
                 return false;
             $user=$stmt->fetch(PDO::FETCH_ASSOC);
-            $stmt=$db->prepare('UPDATE users SET outh_token WHERE user_id=:user_id');
-            $stmt->execute(array(':user_id'=>$user['user_id'],':outh_token'=>$outh_token));
+            $stmt=$db->prepare('UPDATE users SET oauth_token WHERE user_id=:user_id');
+            $stmt->execute(array(':user_id'=>$user['user_id'],':oauth_token'=>$oauth_token));
             if($stmt->rowCount()!=1){
                 return false;
             }
@@ -129,15 +129,16 @@ class UserUtils {
             echo $stmt . "<br>" . $e->getMessage();
         }
     }
-    static function add_user_using_facebook($name,$display_name,$email,$outh_provider,$outh_token,$outh_uid){
+    static function add_user_using_facebook($name,$display_name,$email,$oauth_token,$oauth_uid){
         $db = DatabaseUtils::get_connection();
         try{
-            $stmt = $db->prepare( 'INSERT INTO users (name, display_name, email,outh_provider,outh_token,outh_uid,role) VALUES (:name, :display_name, :email, :outh_provider,:outh_token,:outh_uid,:role);' );
+            $stmt = $db->prepare( 'INSERT INTO users (name, display_name, email,password,oauth_provider,oauth_token,oauth_uid,role) VALUES (:name, :display_name, :email,:password, :oauth_provider,:oauth_token,:oauth_uid,:role);' );
             $params = array(
                 ':name'=>$name,
                 ':display_name'=>$display_name,
                 ':email'=>$email,
-                ':$outh_provider'=>$outh_provider,':outh_token'=>$outh_token,'outh_uid'=>$outh_uid,
+                ':password'=>'',
+                ':$oauth_provider'=>self::LOGIN_PROVIDER_FACEBOOK,':oauth_token'=>$oauth_token,'oauth_uid'=>$oauth_uid,
                 ':role'=>'normal');
             $stmt->execute($params);
             if($db->lastInsertId()){
@@ -176,7 +177,7 @@ class SessionUtils {
 
         // Check password validity
         $hash = $row['password'];
-        if (!password_verify($password, $hash))
+        if (!(password_verify($password, $hash) && $row['oauth_provider']==''))
             return false;
         // All is well; return user info
         return $row;
