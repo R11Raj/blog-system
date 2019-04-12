@@ -7,6 +7,13 @@
  */
 require_once ('../utils/user-utils.php');
 require_once ('../utils/generic-utils.php');
+
+$user_info = SessionUtils::check_user_login_status();
+if (!$user_info || !($user_info['role']==UserUtils::USER_ROLE_ADMIN)){
+    header('Location: ../login.php');
+    exit();
+}
+
 $pageMode = 'master';
 $detailID = null;
 // users.php - master
@@ -96,14 +103,48 @@ if ($pageMode == 'ajax') {
         margin: auto;
 
     }
-    .bg-dark{
+    .nav-bar{
+        width: 100%;
         height: 20%;
+        background: blue;
+        color: white;
+    }
+    #sitemap{
+        width: 20%;
+        height: 100%;
+        border: 2px solid black;
+        float: left;
+    }
+    #main{
+        width: 80%;
+        height: 100%;
+
+        float: right;
     }
 </style>
 <body>
 <!-- master / detail for users -->
-<h1 class="text-primary text-center bg-dark">Users Panel</h1>
-
+<nav class="nav-bar text-center">
+    <h1>Users Panel</h1>
+    <div class="user-function">
+        <?php
+        $user_info=SessionUtils::check_user_login_status();
+        if($user_info){
+            echo '<h3 style="text-align: center;">Welcome '.$user_info['display_name'].'</h3>';
+        }
+        ?>
+        <a id="logout" class="btn btn-default btn-light" href="../logout.php">Logout</a>
+    </div>
+</nav>
+<div id="sitemap">
+    <h4 class="text-center">Site Navigation</h4>
+    <ul>
+        <li><a href="index.php">Dashboard</a></li>
+        <li><a href="posts.php">Posts Panel</a></li>
+        <li><a href="users.php">Users Panel</a></li>
+    </ul>
+</div>
+<div id="main">
 <?php if ($pageMode == 'master') {
     $users=SessionUtils::users_list();
     // Full user table goes here
@@ -158,7 +199,7 @@ if ($pageMode == 'ajax') {
             <td class="text-info"><h6><?php echo $searched_user['email'];?></h6></td>
         </tr>
         </table>
-
+        </div>
         <br>
         <div class="container">
             <div class="row">
@@ -199,7 +240,7 @@ if ($pageMode == 'ajax') {
             </div>
         </div>
     <?php } ?>
-
+</div>
 
 
 

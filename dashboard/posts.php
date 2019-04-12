@@ -5,8 +5,15 @@
  * Date: 31-03-2019
  * Time: 12:48
  */
-require ('../utils/post-utils.php');
-require ('../utils/generic-utils.php');
+require_once('../utils/post-utils.php');
+require_once('../utils/generic-utils.php');
+require_once ('../utils/user-utils.php');
+$user_info = SessionUtils::check_user_login_status();
+if (!$user_info || !($user_info['role']==UserUtils::USER_ROLE_ADMIN)){
+    header('Location: ../login.php');
+    exit();
+}
+
 $pageMode='master';
 $detailID=null;
 function processRequest() {
@@ -38,9 +45,47 @@ processRequest();
         margin: auto;
 
     }
+    .nav-bar{
+        width: 100%;
+        height: 20%;
+        background: blue;
+        color: white;
+    }
+    #sitemap{
+        width: 20%;
+        height: 100%;
+        border: 2px solid black;
+        float: left;
+    }
+    #main{
+        width: 80%;
+        height: 100%;
+
+        float: right;
+    }
 </style>
 <body>
-<h1 class="text-primary text-center bg-dark">Posts Panel</h1>
+<nav class="nav-bar text-center">
+    <h1>Posts Panel</h1>
+    <div class="user-function">
+        <?php
+        $user_info=SessionUtils::check_user_login_status();
+        if($user_info){
+            echo '<h3 style="text-align: center;">Welcome '.$user_info['display_name'].'</h3>';
+        }
+        ?>
+        <a id="logout" class="btn btn-default btn-light" href="../logout.php">Logout</a>
+    </div>
+</nav>
+<div id="sitemap">
+    <h4 class="text-center">Site Navigation</h4>
+    <ul>
+        <li><a href="index.php">Dashboard</a></li>
+        <li><a href="posts.php">Posts Panel</a></li>
+        <li><a href="users.php">Users Panel</a></li>
+    </ul>
+</div>
+<div id="main">
 <?php if ($pageMode == 'master') {
     $posts=PostUtils::posts();
     // Full post table goes here
@@ -69,7 +114,7 @@ processRequest();
 
 <?php } elseif ($pageMode == 'detail') {
 
-    // Only display the user detail
+    // Only display the post detail
     $searched_post=PostUtils::get_post_detail($detailID);
     if(!$searched_post){
         $errors=OutputUtils::get_display_errors();
@@ -108,6 +153,7 @@ processRequest();
 
    <?php }
 }?>
+</div>
         <script>
             // already have jquery
             $(function() {

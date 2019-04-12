@@ -14,15 +14,18 @@ class UserUtils {
     const PERMISSION_PUBLISH_POST = 'publish_post';
     const PERMISSION_MODERATE_COMMENTS = 'moderate_comments';
     const LOGIN_PROVIDER_FACEBOOK = 'facebook';
+    const USER_ROLE_ADMIN='admin';
+    const USER_ROLE_NORMAL='normal';
     static function add_user($name,$display_name,$email,$password){
         $db = DatabaseUtils::get_connection();
         try{
-            $stmt = $db->prepare( 'INSERT INTO users (name, display_name, email, password) VALUES (:name, :display_name, :email, :password)' );
+            $stmt = $db->prepare( 'INSERT INTO users (name, display_name, email, password,role) VALUES (:name, :display_name, :email, :password,:role)' );
             $params = array(
                 ':name'=>$name,
                 ':display_name'=>$display_name,
                 ':email'=>$email,
-                ':password'=>$password
+                ':password'=>$password,
+                ':role'=>self::USER_ROLE_NORMAL
             );
             $stmt->execute($params);
             //$user_id = $db->lastInsertId();
@@ -30,7 +33,23 @@ class UserUtils {
         }
         catch(PDOException $e)
         {
-            echo $stmt . "<br>" . $e->getMessage();
+            echo  "<br>" . $e->getMessage();
+        }
+    }
+    static function get_display_name($user_id){
+        $db = DatabaseUtils::get_connection();
+        $stmt='';
+        try{
+            $stmt = $db->prepare( 'SELECT display_name FROM users WHERE user_id=:user_id;' );
+            $stmt->execute(array(
+                ':user_id'=>$user_id
+            ));
+            $result=$stmt->fetch(PDO::FETCH_ASSOC);
+            return $result['display_name'];
+        }
+        catch(PDOException $e)
+        {
+            echo  "<br>" . $e->getMessage();
         }
     }
     static function check_display_name_availibility($display_name){
@@ -48,15 +67,15 @@ class UserUtils {
             echo $stmt . "<br>" . $e->getMessage();
         }
     }
-    static function check_email_availibility($email){
+    static function check_email_exists($email){
         $db = DatabaseUtils::get_connection();
         try{
             $stmt = $db->prepare( 'SELECT * FROM users WHERE email=:email;');
             $stmt->execute(array(':email'=>$email));
-            if($stmt->rowCount()>0)
-                return false;
+            if($stmt->rowCount()==1)
+                return true;
 
-            return true;
+            return false;
         }
         catch(PDOException $e)
         {
@@ -94,11 +113,11 @@ class UserUtils {
         }
         return true;
     }
-    static function associate_facebook_account($email,$outh_token,$outh_uid){
+    static function associate_facebook_account($email,$oauth_token,$oauth_uid){
         $db = DatabaseUtils::get_connection();
         try{
-            $stmt = $db->prepare( 'UPDATE users SET outh_provider=:outh_provider,$outh_token=:outh_token,$outh_uid=:outh_uid WHERE email=:email;');
-            $stmt->execute(array(':outh_provider'=>self::LOGIN_PROVIDER_FACEBOOK,':email'=>$email,':outh_token'=>$outh_token,':outh_uid'=>$outh_uid));
+            $stmt = $db->prepare( 'UPDATE users SET oauth_provider=:oauth_provider,oauth_token=:oauth_token,oauth_uid=:oauth_uid WHERE email=:email;');
+            $stmt->execute(array(':oauth_provider'=>self::LOGIN_PROVIDER_FACEBOOK,':oauth_token'=>$oauth_token,':oauth_uid'=>$oauth_uid,':email'=>$email));
             if($stmt->rowCount()!=1)
                 return false;
 
@@ -106,10 +125,10 @@ class UserUtils {
         }
         catch(PDOException $e)
         {
-            echo $stmt . "<br>" . $e->getMessage();
+            echo  "<br>" . $e->getMessage();
         }
     }
-    static function check_outh_uid($oauth_provider,$oauth_uid,$oauth_token){
+    static function check_oauth_uid($oauth_provider,$oauth_uid,$oauth_token){
         $db = DatabaseUtils::get_connection();
         try{
             $stmt = $db->prepare( 'SELECT user_id FROM users WHERE oauth_uid=:oauth_uid AND oauth_provider=:oauth_provider;');
@@ -117,7 +136,7 @@ class UserUtils {
             if($stmt->rowCount()!=1)
                 return false;
             $user=$stmt->fetch(PDO::FETCH_ASSOC);
-            $stmt=$db->prepare('UPDATE users SET oauth_token WHERE user_id=:user_id');
+            $stmt=$db->prepare('UPDATE users SET oauth_token=:oauth_token WHERE user_id=:user_id');
             $stmt->execute(array(':user_id'=>$user['user_id'],':oauth_token'=>$oauth_token));
             if($stmt->rowCount()!=1){
                 return false;
@@ -132,23 +151,26 @@ class UserUtils {
     static function add_user_using_facebook($name,$display_name,$email,$oauth_token,$oauth_uid){
         $db = DatabaseUtils::get_connection();
         try{
-            $stmt = $db->prepare( 'INSERT INTO users (name, display_name, email,password,oauth_provider,oauth_token,oauth_uid,role) VALUES (:name, :display_name, :email,:password, :oauth_provider,:oauth_token,:oauth_uid,:role);' );
+            $stmt = $db->prepare( 'INSERT INTO users (name, display_name, email,oauth_provider,oauth_token,oauth_uid,role) VALUES (:name, :display_name, :email,:oauth_provider,:oauth_token,:oauth_uid,:role);' );
             $params = array(
                 ':name'=>$name,
                 ':display_name'=>$display_name,
                 ':email'=>$email,
-                ':password'=>'',
-                ':$oauth_provider'=>self::LOGIN_PROVIDER_FACEBOOK,':oauth_token'=>$oauth_token,'oauth_uid'=>$oauth_uid,
+                ':oauth_provider'=>self::LOGIN_PROVIDER_FACEBOOK,
+                ':oauth_token'=>$oauth_token,
+                ':oauth_uid'=>$oauth_uid,
                 ':role'=>'normal');
             $stmt->execute($params);
-            if($db->lastInsertId()){
-                return true;
+            $uid=$db->lastInsertId();
+            if(!$uid){
+                return false;
             }
-            return false;
+            SessionUtils::create_session($uid);
+            return true;
         }
         catch(PDOException $e)
         {
-            echo $stmt . "<br>" . $e->getMessage();
+            echo "<br>" . $e->getMessage();
         }
     }
 }
@@ -263,10 +285,12 @@ class SessionUtils {
         $db = DatabaseUtils::get_connection();
         $stmt = $db->prepare('SELECT permission FROM permissions WHERE user_id=:user_id');
         $stmt->execute(array(':user_id'=>$user_id));
-        $permissions=$stmt->fetchAll(PDO::FETCH_ASSOC);
-        if(array_search($permission,$permissions))
-            return true;
-        //User has permissions
+        $stmt->setFetchMode(PDO::FETCH_ASSOC);
+        while($permissions=$stmt->fetch()){
+            if(array_search($permission,$permissions))
+                //User has permissions
+                return true;
+        }
         return false;
     }
     /*

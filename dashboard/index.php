@@ -51,11 +51,11 @@ if ($user_info['role']!='admin'){
             echo '<h3 style="text-align: center;">Welcome '.$user_info['display_name'].'</h3>';
         }
         ?>
-        <a id="logout" class="btn btn-default like" href="logout.php">Logout</a>
+        <a id="logout" class="btn btn-default" href="logout.php">Logout</a>
     </div>
 </nav>
 <div class="box-container row text-center">
-        <a class="tab" href="../timeline.php">
+        <a class="tab" href="../index.php">
 
                 Timeline
 

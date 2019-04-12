@@ -9,7 +9,7 @@ class PostUtils{
     }
     static function posts(){
         $db=DatabaseUtils::get_connection();
-        $stmt = $db->prepare("SELECT * from posts;");
+        $stmt = $db->prepare("SELECT * from posts ORDER BY post_id DESC;");
         $stmt->execute();
         $result=$stmt->fetchAll(PDO::FETCH_ASSOC);
         return $result;
@@ -58,6 +58,21 @@ class PostUtils{
             echo $e->getMessage();
         }
         return false;
+    }
+    static function add_post($user_id,$post_header,$post_content){
+        $db=DatabaseUtils::get_connection();
+        try{
+            $stmt=$db->prepare("INSERT INTO posts(user_id,post_header,content) VALUES(:user_id,:post_header,:content);");
+            $stmt->execute(array(':user_id'=>$user_id,':post_header'=>$post_header,':content'=>$post_content));
+            if($db->lastInsertId())
+            {
+               return true;
+            }
+            return false;
+        }catch (PDOException $e){
+            echo $e->getMessage();
+        }
+
     }
 }
 ?>

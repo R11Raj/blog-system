@@ -11,11 +11,32 @@ require_once('vendor/autoload.php');
 // Token is created using Checkout or Elements!
 // Get the payment token ID submitted by the form:
 $token = $_POST['stripeToken'];
+var_dump($token);
+try{
+    $charge = \Stripe\Charge::create([
+        'amount' => 100,
+        'currency' => 'usd',
+        'description' => 'Example charge',
+        'source' => $token,
+    ]);
+}catch(Stripe_CardError $e) {
+    $error1 = $e->getMessage();
+} catch (Stripe_InvalidRequestError $e) {
+    // Invalid parameters were supplied to Stripe's API
+    $error2 = $e->getMessage();
+} catch (Stripe_AuthenticationError $e) {
+    // Authentication with Stripe's API failed
+    $error3 = $e->getMessage();
+} catch (Stripe_ApiConnectionError $e) {
+    // Network communication with Stripe failed
+    $error4 = $e->getMessage();
+} catch (Stripe_Error $e) {
+    // Display a very generic error to the user, and maybe send
+    // yourself an email
+    $error5 = $e->getMessage();
+} catch (Exception $e) {
+    // Something else happened, completely unrelated to Stripe
+    $error6 = $e->getMessage();
+}
 
-$charge = \Stripe\Charge::create([
-    'amount' => 999,
-    'currency' => 'usd',
-    'description' => 'Example charge',
-    'source' => $token,
-]);
 ?>

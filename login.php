@@ -4,7 +4,7 @@ require_once __DIR__ . '/utils/output-utils.php';
 require_once 'utils/user-utils.php';
 $user_info = SessionUtils::check_user_login_status();
 if ($user_info){
-    header('Location: timeline.php');
+    header('Location: index.php');
     exit();
 }
 if(isset($_POST['submit'])){
@@ -23,7 +23,7 @@ if(isset($_POST['submit'])){
             header('Location: '.'dashboard/index.php');
             exit();
         }
-        header('Location: '.'timeline.php');
+        header('Location: '.'index.php');
         exit();
     }
 }
@@ -85,50 +85,56 @@ if(isset($_POST['submit'])){
             session_start();
         }
         /*Step 1: Enter Credentials*/
-        $fb = new \Facebook\Facebook([
-            'app_id' => '519936365202713',
-            'app_secret' => 'a415918ba3ffaf2f7cd2f32a2a92c8a9',
-            'default_graph_version' => 'v2.10',
-            //'default_access_token' => '{access-token}', // optional
-        ]);
+        try{
+            $fb = new \Facebook\Facebook([
+                'app_id' => '519936365202713',
+                'app_secret' => 'a415918ba3ffaf2f7cd2f32a2a92c8a9',
+                'default_graph_version' => 'v2.10',
+                //'default_access_token' => '{access-token}', // optional
+            ]);
+        }catch (Exception $e){
+            echo $e->message();
+        }
         /*Step 2 Create the url*/
         $permissions=['email'];
         if(empty($access_token)) {
-            echo "<a href='{$fb->getRedirectLoginHelper()->getLoginUrl("http://localhost/blog_system/login.php",$permissions)}'>Sign Up/Sign In with Facebook </a>";
+            echo "<a class='btn btn-primary' href='{$fb->getRedirectLoginHelper()->getLoginUrl("http://localhost/blog_system/login.php",$permissions)}'>Sign Up/Sign In with Facebook </a><br>";
         }
         /*Step 3 : Get Access Token*/
         $access_token = $fb->getRedirectLoginHelper()->getAccessToken();
         /*Step 4: Get the graph user*/
+        //$fb_user='';
         if(isset($access_token)) {
-            try {
-                $response = $fb->get('/me?fields=name,id,email,first_name',$access_token);
+           try {
+                $response = $fb->get('/me?fields=name,id,email,first_name', $access_token);
                 $fb_user = $response->getGraphUser();
 
             } catch (\Facebook\Exceptions\FacebookResponseException $e) {
-                echo  'Graph returned an error: ' . $e->getMessage();
+                echo 'Graph returned an error: ' . $e->getMessage();
             } catch (\Facebook\Exceptions\FacebookSDKException $e) {
                 // When validation fails or other local issues
                 echo 'Facebook SDK returned an error: ' . $e->getMessage();
             }
-        }
-        if(UserUtils::check_email_availibility($fb_user['email'])){
-            if(!UserUtils::associate_facebook_account($fb_user['email'],$access_token,$fb_user['id'])){
-                OutputUtils::note_display_error('facebook account linking error');
-                exit();
-            }
-            echo '<script>alert("facebook account linked successfully");</script>';
-        }
-        else{
-            $uid=UserUtils::check_outh_uid(UserUtils::LOGIN_PROVIDER_FACEBOOK,$fb_user['id'],$access_token);
-            if($uid){
-                SessionUtils::create_session($uid);
-            }
-            else{
-                if(!UserUtils::add_user_using_facebook($fb_user['first_name'],$fb_user['name'],$fb_user['email'],$access_token,$fb_user['id'])){
-                    OutputUtils::note_display_error('user not added some error occured');
+            if (UserUtils::check_email_exists($fb_user['email'])) {
+
+                if (!UserUtils::associate_facebook_account($fb_user['email'], $access_token, $fb_user['id'])) {
+                    OutputUtils::note_display_error('facebook account linking error');
+                    //header('Location: login.php');
+                    exit();
                 }
-                else{
-                    echo '<script>alert("User account added successfully");</script>';
+                echo '<script>alert("facebook account linked successfully");</script>';
+            } else {
+                $uid = UserUtils::check_oauth_uid(UserUtils::LOGIN_PROVIDER_FACEBOOK, $fb_user['id'], $access_token);
+                if ($uid) {
+                    SessionUtils::create_session($uid);
+                } else {
+                    if (!UserUtils::add_user_using_facebook($fb_user['first_name'], $fb_user['name'], $fb_user['email'], $access_token, $fb_user['id'])) {
+                        OutputUtils::note_display_error('user not added some error occured');
+                    } else {
+                        echo '<script>alert("User account added successfully");</script>';
+                        header('Location: index.php');
+                        exit();
+                    }
                 }
             }
         }
