@@ -10,12 +10,14 @@
 require_once('utils/post-utils.php');
 require_once('utils/user-utils.php');
 require_once('utils/output-utils.php');
+
+
 if(isset($_POST['submit'])) {
-    $name = @$_POST['name'];
-    $display_name = @$_POST['display_name'];
-    $email = @$_POST['email'];
-    $password = @$_POST['password'];
-    $cpassword = @$_POST['confirm_password'];
+    $name = htmlspecialchars(@$_POST['name']);
+    $display_name = htmlspecialchars(@$_POST['display_name']);
+    $email = htmlspecialchars(@$_POST['email']);
+    $password = htmlspecialchars(@$_POST['password']);
+    $cpassword = htmlspecialchars(@$_POST['confirm_password']);
     function validate($name, $display_name,$email, $password, $cpassword)
     {
         if (!preg_match("/^[a-zA-Z -]*$/", $name)) {
@@ -30,7 +32,7 @@ if(isset($_POST['submit'])) {
         if(!UserUtils::check_display_name_availibility($display_name)){
             OutputUtils::note_display_error("Display name already Taken");
         }
-        if(!UserUtils::check_email_availibility($email)){
+        if(UserUtils::check_email_exists($email)){
             OutputUtils::note_display_error("Email Id already Taken");
         }
         if ($password != $cpassword) {
@@ -97,16 +99,16 @@ if(isset($_POST['submit'])) {
         <form action="#" method="post">
             <table>
             <tr>
-                <td><label>Name</label></td><td><input type="text" name="name" required value="<?php echo isset($_POST['name']) ? $_POST['name'] : '';?>"></td>
+                <td><label>Name</label></td><td><input type="text" name="name" required value="<?php echo isset($_POST['name']) ? htmlspecialchars($_POST['name']) : '';?>"></td>
             </tr>
             <tr>
-                <td><label>Display Name</label></td><td><input type="text" name="display_name" required value="<?php echo isset($_POST['display_name']) ? $_POST['display_name'] : '';?>"></td>
+                <td><label>Display Name</label></td><td><input type="text" name="display_name" required value="<?php echo isset($_POST['display_name']) ? htmlspecialchars($_POST['display_name']) : '';?>"></td>
             </tr>
             <tr>
-                <td><label>Email address</label></td><td><input type="email" name="email" required value="<?php echo isset($_POST['email']) ? $_POST['email'] : '';?>"></td>
+                <td><label>Email address</label></td><td><input type="email" name="email" required value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : '';?>"></td>
             </tr>
             <tr>
-                <td><span><br>**password should be atleast 8 characters long</span></td>
+                <td><span><br>**password should be atleast 8 characters long..</span></td>
             </tr>
             <tr>
                 <td><label>Password</label></td><td><input type="password" name="password" required></td>
@@ -115,7 +117,7 @@ if(isset($_POST['submit'])) {
                 <td><label>Confirm Password</label></td><td><input type="password" name="confirm_password" required></td>
             </tr>
             <tr>
-                <td><button type="submit" name="submit">Submit</button></td>
+                <td><button class="btn btn-default btn-success" type="submit" name="submit">Submit</button></td>
             </tr>
             </table>
         </form>

@@ -1,5 +1,40 @@
 <?php
 require_once('utils/user-utils.php');
+require_once('vendor/autoload.php');
+\Stripe\Stripe::setApiKey("sk_test_00reSatqkvoV5Tvn0DiIDinZ00x50gQ1RX");
+if(isset($_POST['amount'])){
+   // Token is created using Checkout or Elements!
+// Get the payment token ID submitted by the form:
+    $token = $_POST['stripeToken'];
+    $amount= $_POST['amount'];
+    try{
+        $charge = \Stripe\Charge::create([
+            'amount' => $amount,
+            'currency' => 'usd',
+            'description' => 'Example charge',
+            'source' => $token,
+        ]);
+    }catch(Stripe_CardError $e) {
+        $error1 = $e->getMessage();
+    } catch (Stripe_InvalidRequestError $e) {
+        // Invalid parameters were supplied to Stripe's API
+        $error2 = $e->getMessage();
+    } catch (Stripe_AuthenticationError $e) {
+        // Authentication with Stripe's API failed
+        $error3 = $e->getMessage();
+    } catch (Stripe_ApiConnectionError $e) {
+        // Network communication with Stripe failed
+        $error4 = $e->getMessage();
+    } catch (Stripe_Error $e) {
+        // Display a very generic error to the user, and maybe send
+        // yourself an email
+        $error5 = $e->getMessage();
+    } catch (Exception $e) {
+        // Something else happened, completely unrelated to Stripe
+        $error6 = $e->getMessage();
+    }
+    OutputUtils::set_page_mode('donated');
+}
 ?>
 <!doctype html>
 <html lang="en">
@@ -67,14 +102,18 @@ require_once('utils/user-utils.php');
             }?>
         </div>
     </nav>
-    <div style="border:2px solid black;">
+    <?php if(OutputUtils::get_page_mode()=='donated'){
+        echo '<h4 style="color:green;text-align: center;">Thank you for your Donation <a href="index.php"> click here to open timeline</a> </h4>';
+    }
+    else{?>
+    <div >
         <h3 class="text-center">Make a Donation $$</h3>
-        <form action="charge.php" method="post" id="payment-form">
+        <form action="#" method="post" id="payment-form">
             <div class="form-row">
              <table>
                 <tr>
-                    <label>Amount (in USD)</label>
-                    <input type="number" min="0" id="amount" required>
+                    <label>Amount (in USD) :</label>
+                    <input type="number" min="0" id="amount" name="amount" required>
                 </tr>
                 <tr><br>
                 <label for="card-element">
@@ -89,15 +128,22 @@ require_once('utils/user-utils.php');
              </table>
             </div>
             <br>
-            <button class="btn btn-default btn-success">Submit Payment</button>
+            <button class="btn btn-default btn-success" type="submit">Submit Payment</button>
         </form>
     </div>
+    <?php } ?>
     <script>
         var amount=0;
         $(function() {
             $("#amount").change(function () {
                amount=$("#amount").val();
-            console.log(amount);
+                if(amount<=0){
+                    alert('Amount should be greater than Zero!!');
+                    $('button').attr('disabled',true);
+                }
+                else{
+                    $('button').attr('disabled',false);
+                }
             });
         });
         var stripe = Stripe('pk_test_oVqEzgaPgrDBrCaekDDINTwS00MW8uDPxu');
@@ -151,6 +197,7 @@ require_once('utils/user-utils.php');
             hiddenInput.setAttribute('amount','10.00');
             form.appendChild(hiddenInput);
             console.log(token.id);
+            console.log(form);
             // Submit the form
             form.submit();
         }

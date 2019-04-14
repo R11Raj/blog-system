@@ -62,8 +62,8 @@ class PostUtils{
     static function add_post($user_id,$post_header,$post_content){
         $db=DatabaseUtils::get_connection();
         try{
-            $stmt=$db->prepare("INSERT INTO posts(user_id,post_header,content) VALUES(:user_id,:post_header,:content);");
-            $stmt->execute(array(':user_id'=>$user_id,':post_header'=>$post_header,':content'=>$post_content));
+            $stmt=$db->prepare("INSERT INTO posts(user_id,post_header,content,likes,time_date) VALUES(:user_id,:post_header,:content,:likes,:time_date);");
+            $stmt->execute(array(':user_id'=>$user_id,':post_header'=>$post_header,':content'=>$post_content,':likes'=>0,':time_date'=>date('Y-m-d h:m:s')));
             if($db->lastInsertId())
             {
                return true;
@@ -73,6 +73,34 @@ class PostUtils{
             echo $e->getMessage();
         }
 
+    }
+    static function time_elapsed_string($datetime, $full = false) {
+        $now = new DateTime;
+        $ago = new DateTime($datetime);
+        $diff = $now->diff($ago);
+
+        $diff->w = floor($diff->d / 7);
+        $diff->d -= $diff->w * 7;
+
+        $string = array(
+            'y' => 'year',
+            'm' => 'month',
+            'w' => 'week',
+            'd' => 'day',
+            'h' => 'hour',
+            'i' => 'minute',
+            's' => 'second',
+        );
+        foreach ($string as $k => &$v) {
+            if ($diff->$k) {
+                $v = $diff->$k . ' ' . $v . ($diff->$k > 1 ? 's' : '');
+            } else {
+                unset($string[$k]);
+            }
+        }
+
+        if (!$full) $string = array_slice($string, 0, 1);
+        return $string ? implode(', ', $string) . ' ago' : 'just now';
     }
 }
 ?>

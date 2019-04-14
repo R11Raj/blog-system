@@ -9,7 +9,7 @@ require_once __DIR__ . '/database.php';
 require_once __DIR__ . '/generic-utils.php';
 require_once ('output-utils.php');
 class UserUtils {
-    const PERMISSION_WRITE_POST = 'write_post';
+    const PERMISSION_DELETE_POST = 'delete_post';
     const PERMISSION_EDIT_POST = 'edit_post';
     const PERMISSION_PUBLISH_POST = 'publish_post';
     const PERMISSION_MODERATE_COMMENTS = 'moderate_comments';
@@ -28,8 +28,10 @@ class UserUtils {
                 ':role'=>self::USER_ROLE_NORMAL
             );
             $stmt->execute($params);
-            //$user_id = $db->lastInsertId();
-            return true;
+            if($db->lastInsertId()){
+                return true;
+            }
+            return false;
         }
         catch(PDOException $e)
         {
@@ -70,7 +72,7 @@ class UserUtils {
     static function check_email_exists($email){
         $db = DatabaseUtils::get_connection();
         try{
-            $stmt = $db->prepare( 'SELECT * FROM users WHERE email=:email;');
+            $stmt = $db->prepare( 'SELECT email FROM users WHERE email=:email;');
             $stmt->execute(array(':email'=>$email));
             if($stmt->rowCount()==1)
                 return true;
@@ -82,9 +84,24 @@ class UserUtils {
             echo $stmt . "<br>" . $e->getMessage();
         }
     }
+    static function check_facebook_account_exists($email){
+        $db = DatabaseUtils::get_connection();
+        try{
+            $stmt = $db->prepare( 'SELECT display_name FROM users WHERE email=:email AND oauth_provider=:oauth_provider AND oauth_uid IS NOT NULL;');
+            $stmt->execute(array(':email'=>$email,':oauth_provider'=>self::LOGIN_PROVIDER_FACEBOOK));
+            if($stmt->rowCount()==1)
+                return true;
+
+            return false;
+        }
+        catch(PDOException $e)
+        {
+            echo $stmt . "<br>" . $e->getMessage();
+        }
+    }
     static function getPossiblePermissions() {
-        // return a pre-defined array
-        return array('write_post', 'edit_post', 'publish_post', 'moderate_comments');
+        // return a pre-defined array 'write_post', 'edit_post', 'publish_post', 'moderate_comments'
+        return array(self::PERMISSION_PUBLISH_POST,self::PERMISSION_EDIT_POST,self::PERMISSION_DELETE_POST,self::PERMISSION_MODERATE_COMMENTS);
     }
 
     static  function add_user_permissions($user_id,$permissions){
@@ -171,6 +188,51 @@ class UserUtils {
         catch(PDOException $e)
         {
             echo "<br>" . $e->getMessage();
+        }
+    }
+    static function change_name($user_id,$name){
+        $db = DatabaseUtils::get_connection();
+        try{
+            $stmt = $db->prepare( 'UPDATE users SET name=:name WHERE user_id=:user_id;');
+            $stmt->execute(array(':name'=>$name,':user_id'=>$user_id));
+            if($stmt->rowCount()!=1)
+                return false;
+
+            return true;
+        }
+        catch(PDOException $e)
+        {
+            echo  "<br>" . $e->getMessage();
+        }
+    }
+    static function change_display_name($display_name,$user_id){
+        $db = DatabaseUtils::get_connection();
+        try{
+            $stmt = $db->prepare( 'UPDATE users SET display_name=:display_name WHERE user_id=:user_id;');
+            $stmt->execute(array(':display_name'=>$display_name,':user_id'=>$user_id));
+            if($stmt->rowCount()!=1)
+                return false;
+
+            return true;
+        }
+        catch(PDOException $e)
+        {
+            echo  "<br>" . $e->getMessage();
+        }
+    }
+    static function change_email($email,$user_id){
+        $db = DatabaseUtils::get_connection();
+        try{
+            $stmt = $db->prepare( 'UPDATE users SET email=:email WHERE user_id=:user_id;');
+            $stmt->execute(array(':email'=>$email,':user_id'=>$user_id));
+            if($stmt->rowCount()!=1)
+                return false;
+
+            return true;
+        }
+        catch(PDOException $e)
+        {
+            echo  "<br>" . $e->getMessage();
         }
     }
 }

@@ -11,7 +11,7 @@ require_once('vendor/autoload.php');
 // Token is created using Checkout or Elements!
 // Get the payment token ID submitted by the form:
 $token = $_POST['stripeToken'];
-var_dump($token);
+var_dump($_POST['amount']);
 try{
     $charge = \Stripe\Charge::create([
         'amount' => 100,
@@ -38,5 +38,5 @@ try{
     // Something else happened, completely unrelated to Stripe
     $error6 = $e->getMessage();
 }
-
+echo '<h4 style="color:green;text-align: center;">Thank you for your Donation <a href="index.php"> click here to open timeline</a> </h4>';
 ?>

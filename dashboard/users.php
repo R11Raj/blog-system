@@ -9,7 +9,9 @@ require_once ('../utils/user-utils.php');
 require_once ('../utils/generic-utils.php');
 
 $user_info = SessionUtils::check_user_login_status();
-if (!$user_info || !($user_info['role']==UserUtils::USER_ROLE_ADMIN)){
+$user_id=@$_GET['user_id'];
+echo '<script>console.log(5)</script>';
+if ($user_id!=$user_info['user_id'] || !($user_info['role']==UserUtils::USER_ROLE_ADMIN) ){
     header('Location: ../login.php');
     exit();
 }
@@ -38,9 +40,6 @@ function processRequest() {
     }
 }
 processRequest();
-if ($pageMode == 'detail') {
-    // Get user information for the appropriate ID, etc etc
-}
 // Ajax handler
 if ($pageMode == 'ajax') {
     // do some magic processing
@@ -53,6 +52,10 @@ if ($pageMode == 'ajax') {
     $permissions=@$_POST['permissions'];
     $updated_permissions=@$_POST['updated_permissions'];
 
+    $name=htmlspecialchars(@$_POST['name']);
+    $display_name=htmlspecialchars(@$_POST['display_name']);
+    $email=htmlspecialchars(@$_POST['email']);
+
     $userState = SessionUtils::check_user_login_status();
     if (!$userState)
         OutputUtils::writeAjaxError('Invalid login');
@@ -62,9 +65,31 @@ if ($pageMode == 'ajax') {
         OutputUtils::writeAjaxError('You Don\'t have the required permissions to update');
         exit();
     }
-
+    if($name!='') {
+        if (!UserUtils::change_name($user_id, $name)) {
+            OutputUtils::writeAjaxError('Some error occured');
+        }
+        OutputUtils::set_page_mode('updated');
+    }
+    if($display_name!='') {
+        if (!UserUtils::check_display_name_availibility($display_name)) {
+            OutputUtils::writeAjaxError('Display name is already in use');
+        } else if (!UserUtils::change_display_name($display_name, $user_id)) {
+            OutputUtils::writeAjaxError('Some error occured in changing Display name');
+        }
+        OutputUtils::set_page_mode('updated');
+    }
+    if($email!='') {
+        if (UserUtils::check_email_exists($email)) {
+            OutputUtils::writeAjaxError('This email id is already in use');
+        } else if (!UserUtils::change_email($email, $user_id)) {
+            OutputUtils::writeAjaxSuccess('Some error in changing email', $name);
+        }
+        OutputUtils::set_page_mode('updated');
+    }
     if($permissions==$updated_permissions){
-        OutputUtils::writeAjaxSuccess('User permissions updated successfully',$permissions);
+        OutputUtils::set_page_mode('updated');
+        //OutputUtils::writeAjaxSuccess('User permissions updated successfully',$permissions);
     }
     else{
         $permissions_to_be_deleted=array_diff($permissions, $updated_permissions);
@@ -72,20 +97,25 @@ if ($pageMode == 'ajax') {
 
         if(!empty($permissions_to_be_deleted)){
             if(UserUtils::delete_user_permissions($user_id,$permissions_to_be_deleted)){
-                OutputUtils::writeAjaxSuccess('User permissions updated successfully',$updated_permissions);
+                OutputUtils::set_page_mode('updated');
+                //OutputUtils::writeAjaxSuccess('User permissions updated successfully',$updated_permissions);
             }
             else{
                 OutputUtils::writeAjaxError('failed');
             }
         }else if(!empty($permissions_to_be_added)){
             if(UserUtils::add_user_permissions($user_id,$permissions_to_be_added)){
-                OutputUtils::writeAjaxSuccess('User permissions updated successfully',$updated_permissions);
+                OutputUtils::set_page_mode('updated');
+                //OutputUtils::writeAjaxSuccess('User permissions updated successfully',$updated_permissions);
 
             }
             else{
                 OutputUtils::writeAjaxError('failed');
             }
         }
+    }
+    if(OutputUtils::get_page_mode()=='updated'){
+        OutputUtils::writeAjaxSuccess('User details updated successfully');
     }
     exit; //<-- SUPER IMPORTANT
 }
@@ -138,11 +168,13 @@ if ($pageMode == 'ajax') {
 </nav>
 <div id="sitemap">
     <h4 class="text-center">Site Navigation</h4>
+    <?php if($user_info['role']=='admin'){?>
     <ul>
         <li><a href="index.php">Dashboard</a></li>
         <li><a href="posts.php">Posts Panel</a></li>
         <li><a href="users.php">Users Panel</a></li>
     </ul>
+    <?php } ?>
 </div>
 <div id="main">
 <?php if ($pageMode == 'master') {
@@ -188,15 +220,15 @@ if ($pageMode == 'ajax') {
         </tr>
         <tr>
             <td><h5>Name: </h5></td>
-            <td class="text-info"><h6><?php echo $searched_user['NAME'];?></h6></td>
+            <td class="text-info"><input id="name" type="text" value="<?php echo $searched_user['NAME'];?>"></td>
         </tr>
         <tr>
             <td><h5>Display Name: </h5></td>
-            <td class="text-info"><h6><?php echo $searched_user['display_name'];?></h6></td>
+            <td class="text-info"><input id="display_name" type="text" value="<?php echo $searched_user['display_name'];?>"></td>
         </tr>
         <tr>
             <td><h5>Email ID: </h5></td>
-            <td class="text-info"><h6><?php echo $searched_user['email'];?></h6></td>
+            <td class="text-info"><input id="email" type="email" value="<?php echo $searched_user['email'];?>"></td>
         </tr>
         </table>
         </div>
@@ -235,7 +267,7 @@ if ($pageMode == 'ajax') {
                         ?>
                     </form>
                     <br>
-                    <button id="update-button" class="btn btn-success" disabled>Update Permissions</button>
+                    <button id="update-button" class="btn btn-success" disabled>Update User</button>
                 </div>
             </div>
         </div>
@@ -252,9 +284,25 @@ if ($pageMode == 'ajax') {
             var update_button=$('#update-button');
             var updated_permissions = new Array();
             var permissions=new Array();
+            var name='';
+            var display_name='';
+            var email='';
+            $('#name').keyup(function () {
+               name= $('#name').val();
+                update_button.attr('disabled',false);
+            });
+            $('#display_name').keyup(function () {
+                display_name= $('#display_name').val();
+                update_button.attr('disabled',false);
+            });
+            $('#email').keyup(function () {
+                email= $('#email').val();
+                update_button.attr('disabled',false);
+            });
             $('input:checked').each(function () {
                 permissions.push($(this).val());
             });
+            console.log('permissions'+permissions);
             checkboxes.click(function() {
                 // loop through all of the checkboxes and see which ones are selected; based on that, build a list
                 updated_permissions=[];
@@ -263,6 +311,7 @@ if ($pageMode == 'ajax') {
                 });
                 update_button.attr('disabled',false);
             });
+            console.log('updated permissions'+updated_permissions);
             update_button.click(function () {
                 if(confirm('Are you sure you want to update the permissions?')) {
 
@@ -270,6 +319,9 @@ if ($pageMode == 'ajax') {
                         method: 'POST',
                         data: {
                             userID:<?php echo $detailID;?>,
+                            name:name,
+                            display_name:display_name,
+                            email:email,
                             permissions: permissions,
                             updated_permissions: updated_permissions
                         }

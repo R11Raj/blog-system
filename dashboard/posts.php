@@ -78,12 +78,15 @@ processRequest();
     </div>
 </nav>
 <div id="sitemap">
+
     <h4 class="text-center">Site Navigation</h4>
+    <?php if($user_info['role']=='admin'){?>
     <ul>
         <li><a href="index.php">Dashboard</a></li>
         <li><a href="posts.php">Posts Panel</a></li>
         <li><a href="users.php">Users Panel</a></li>
     </ul>
+    <?php}?>
 </div>
 <div id="main">
 <?php if ($pageMode == 'master') {

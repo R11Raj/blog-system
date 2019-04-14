@@ -115,18 +115,19 @@ if(isset($_POST['submit'])){
                 // When validation fails or other local issues
                 echo 'Facebook SDK returned an error: ' . $e->getMessage();
             }
-            if (UserUtils::check_email_exists($fb_user['email'])) {
+            if (!UserUtils::check_facebook_account_exists($fb_user['email'])) {
 
                 if (!UserUtils::associate_facebook_account($fb_user['email'], $access_token, $fb_user['id'])) {
                     OutputUtils::note_display_error('facebook account linking error');
                     //header('Location: login.php');
                     exit();
                 }
-                echo '<script>alert("facebook account linked successfully");</script>';
             } else {
                 $uid = UserUtils::check_oauth_uid(UserUtils::LOGIN_PROVIDER_FACEBOOK, $fb_user['id'], $access_token);
                 if ($uid) {
                     SessionUtils::create_session($uid);
+                    header('Location: index.php');
+                    exit();
                 } else {
                     if (!UserUtils::add_user_using_facebook($fb_user['first_name'], $fb_user['name'], $fb_user['email'], $access_token, $fb_user['id'])) {
                         OutputUtils::note_display_error('user not added some error occured');
