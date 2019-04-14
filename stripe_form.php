@@ -39,7 +39,7 @@ if(isset($_POST['amount'])){
 <!doctype html>
 <html lang="en">
 <head>
-    <title>Stripe</title>
+    <title>Donation</title>
     <meta charset="utf-8">
     <script src="jquery-3.3.1.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -87,10 +87,15 @@ if(isset($_POST['amount'])){
         -webkit-appearance: none;
 
     }
+    #sitemap{
+        width: 20%;
+        height: 100%;
+        float: left;
+    }
 </style>
 <body>
     <nav class="nav-bar text-center">
-        <h1 class="title">Timeline</h1>
+        <h1 class="title">Make a Donation</h1>
         <div class="user-function">
             <?php
             $user_info=SessionUtils::check_user_login_status();
@@ -102,8 +107,16 @@ if(isset($_POST['amount'])){
             }?>
         </div>
     </nav>
+    <div id="sitemap">
+        <h4 class="text-center">Site Navigation</h4>
+        <ul>
+            <li><a href="index.php">Timeline</a></li>
+            <li><a href="edit_user_details.php?action=detail&user_id=<?php echo $user_info['user_id'];?>">Edit User</a></li>
+            <li><a href="logout.php">Logout</a></li>
+        </ul>
+    </div>
     <?php if(OutputUtils::get_page_mode()=='donated'){
-        echo '<h4 style="color:green;text-align: center;">Thank you for your Donation <a href="index.php"> click here to open timeline</a> </h4>';
+        echo '<br><h4 style="color:green;text-align: center;">Thank you for your Donation <a href="index.php"> click here to open timeline</a> </h4>';
     }
     else{?>
     <div >
@@ -113,7 +126,7 @@ if(isset($_POST['amount'])){
              <table>
                 <tr>
                     <label>Amount (in USD) :</label>
-                    <input type="number" min="0" id="amount" name="amount" required>
+                    <input type="number" min="0" step="0.01" id="amount" name="amount" required>
                 </tr>
                 <tr><br>
                 <label for="card-element">
@@ -196,8 +209,6 @@ if(isset($_POST['amount'])){
             hiddenInput.setAttribute('value', token.id);
             hiddenInput.setAttribute('amount','10.00');
             form.appendChild(hiddenInput);
-            console.log(token.id);
-            console.log(form);
             // Submit the form
             form.submit();
         }
